@@ -174,7 +174,7 @@ namespace UnityEditor.Experimental.Rendering.LightweightPipeline
             if (lw == null)
                 return;
 
-            ShaderFeatures features = LightweightRenderPipeline.GetSupportedShaderFeatures();
+            ShaderFeatures features = LightweightRenderPipeline.supportedShaderFeatures;
             int prevVariantCount = compilerDataList.Count;
 
             for (int i = 0; i < compilerDataList.Count; ++i)

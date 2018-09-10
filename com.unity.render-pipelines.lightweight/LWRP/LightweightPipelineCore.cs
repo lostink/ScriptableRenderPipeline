@@ -99,47 +99,50 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
 
     public sealed partial class LightweightRenderPipeline
     {
-        static ShaderFeatures s_ShaderFeatures;
+        static ShaderFeatures s_SupportedShaderFeatures;
 
-        public static ShaderFeatures GetSupportedShaderFeatures()
+        public static ShaderFeatures supportedShaderFeatures
         {
-            return s_ShaderFeatures;
+            get { return s_SupportedShaderFeatures; }
+        }
+
+        static void SetSupportedShaderFeatures(LightweightPipelineAsset pipelineAsset)
+        {
+            s_SupportedShaderFeatures = ShaderFeatures.RealtimeDirectionalLights;
+
+            if (pipelineAsset.supportsDirectionalShadows)
+                s_SupportedShaderFeatures |= ShaderFeatures.RealtimeDirectionalLightShadows;
+
+            if (pipelineAsset.punctualLightsSupport == RealtimeLightSupport.PerVertex)
+            {
+                s_SupportedShaderFeatures |= ShaderFeatures.RealtimePunctualLightsVertex;
+            }
+            else if (pipelineAsset.punctualLightsSupport == RealtimeLightSupport.PerPixel)
+            {
+                s_SupportedShaderFeatures |= ShaderFeatures.RealtimeDirectionalLights;
+                if (pipelineAsset.supportsPunctualShadows)
+                    s_SupportedShaderFeatures |= ShaderFeatures.RealtimePunctualLightShadows;
+            }
+
+            bool anyShadows = pipelineAsset.supportsDirectionalShadows || pipelineAsset.supportsPunctualShadows;
+            if (pipelineAsset.supportsSoftShadows && anyShadows)
+                s_SupportedShaderFeatures |= ShaderFeatures.SoftShadows;
+
+            if (pipelineAsset.mixedLightingSupported)
+                s_SupportedShaderFeatures |= ShaderFeatures.MixedLighting;
+        }
+        public static bool IsStereoEnabled(Camera camera)
+        {
+            if (camera == null)
+                throw new ArgumentNullException("camera");
+
+            bool isSceneViewCamera = camera.cameraType == CameraType.SceneView;
+            return XRGraphicsConfig.enabled && !isSceneViewCamera && (camera.stereoTargetEye == StereoTargetEyeMask.Both);
         }
 
         void SortCameras(Camera[] cameras)
         {
             Array.Sort(cameras, (lhs, rhs) => (int)(lhs.depth - rhs.depth));
-        }
-
-        static void SetSupportedShaderFeatures(LightweightPipelineAsset pipelineAsset)
-        {
-            s_ShaderFeatures = ShaderFeatures.RealtimeDirectionalLights;
-
-            if (pipelineAsset.supportsDirectionalShadows)
-                s_ShaderFeatures |= ShaderFeatures.RealtimeDirectionalLightShadows;
-
-            if (pipelineAsset.punctualLightsSupport == RealtimeLightSupport.PerVertex)
-            {
-                s_ShaderFeatures |= ShaderFeatures.RealtimePunctualLightsVertex;
-            }
-            else if (pipelineAsset.punctualLightsSupport == RealtimeLightSupport.PerPixel)
-            {
-                s_ShaderFeatures |= ShaderFeatures.RealtimeDirectionalLights;
-                if (pipelineAsset.supportsPunctualShadows)
-                    s_ShaderFeatures |= ShaderFeatures.RealtimePunctualLightShadows;
-            }
-
-            bool anyShadows = pipelineAsset.supportsDirectionalShadows || pipelineAsset.supportsPunctualShadows;
-            if (pipelineAsset.supportsSoftShadows && anyShadows)
-                s_ShaderFeatures |= ShaderFeatures.SoftShadows;
-
-            if (pipelineAsset.mixedLightingSupported)
-                s_ShaderFeatures |= ShaderFeatures.MixedLighting;
-        }
-        public static bool IsStereoEnabled(Camera camera)
-        {
-            bool isSceneViewCamera = camera.cameraType == CameraType.SceneView;
-            return XRGraphicsConfig.enabled && !isSceneViewCamera && (camera.stereoTargetEye == StereoTargetEyeMask.Both);
         }
     }
 }

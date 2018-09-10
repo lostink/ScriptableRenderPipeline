@@ -62,8 +62,8 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
 
     public class LightweightPipelineAsset : RenderPipelineAsset, ISerializationCallbackReceiver
     {
-        public static readonly string s_SearchPathProject = "Assets";
-        public static readonly string s_SearchPathPackage = "Packages/com.unity.render-pipelines.lightweight";
+        static readonly string s_SearchPathProject = "Assets";
+        static readonly string s_SearchPathPackage = "Packages/com.unity.render-pipelines.lightweight";
 
         Shader m_DefaultShader;
 
@@ -365,7 +365,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         public override Shader GetDefaultShader()
         {
             if (m_DefaultShader == null)
-                m_DefaultShader = Shader.Find(LightweightShaderUtils.GetShaderPath(ShaderPathID.STANDARD_PBS));
+                m_DefaultShader = Shader.Find(LightweightShaderUtils.GetShaderPath(ShaderPathID.PhysicallyBased));
             return m_DefaultShader;
         }
 

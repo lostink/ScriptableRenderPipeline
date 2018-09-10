@@ -239,7 +239,7 @@ namespace UnityEditor.Experimental.Rendering.LightweightPipeline
 
         public StandardUpgrader(string oldShaderName)
         {
-            string standardShaderPath = LightweightShaderUtils.GetShaderPath(ShaderPathID.STANDARD_PBS);
+            string standardShaderPath = LightweightShaderUtils.GetShaderPath(ShaderPathID.PhysicallyBased);
             if (oldShaderName.Contains("Specular"))
                 RenameShader(oldShaderName, standardShaderPath, UpdateStandardSpecularMaterialKeywords);
             else
@@ -251,7 +251,7 @@ namespace UnityEditor.Experimental.Rendering.LightweightPipeline
     {
         public StandardSimpleLightingUpgrader(string oldShaderName, UpgradeParams upgradeParams)
         {
-            RenameShader(oldShaderName, LightweightShaderUtils.GetShaderPath(ShaderPathID.STANDARD_SIMPLE_LIGHTING), UpdateMaterialKeywords);
+            RenameShader(oldShaderName, LightweightShaderUtils.GetShaderPath(ShaderPathID.SimpleLit), UpdateMaterialKeywords);
             SetFloat("_Surface", (float)upgradeParams.surfaceType);
             SetFloat("_Blend", (float)upgradeParams.blendMode);
             SetFloat("_AlphaClip", upgradeParams.alphaClip ? 1 : 0);
@@ -305,7 +305,7 @@ namespace UnityEditor.Experimental.Rendering.LightweightPipeline
     {
         public TerrainUpgrader(string oldShaderName)
         {
-            RenameShader(oldShaderName, LightweightShaderUtils.GetShaderPath(ShaderPathID.STANDARD_TERRAIN));
+            RenameShader(oldShaderName, LightweightShaderUtils.GetShaderPath(ShaderPathID.TerrainPhysicallyBased));
         }
     }
 
@@ -314,9 +314,9 @@ namespace UnityEditor.Experimental.Rendering.LightweightPipeline
         public ParticleUpgrader(string oldShaderName)
         {
             if (oldShaderName.Contains("Unlit"))
-                RenameShader(oldShaderName, LightweightShaderUtils.GetShaderPath(ShaderPathID.STANDARD_PARTICLES_UNLIT));
+                RenameShader(oldShaderName, LightweightShaderUtils.GetShaderPath(ShaderPathID.ParticlesUnlit));
             else
-                RenameShader(oldShaderName, LightweightShaderUtils.GetShaderPath(ShaderPathID.STANDARD_PARTICLES_LIT));
+                RenameShader(oldShaderName, LightweightShaderUtils.GetShaderPath(ShaderPathID.ParticlesPhysicallyBased));
         }
     }
 }
