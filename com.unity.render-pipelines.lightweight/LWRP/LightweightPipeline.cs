@@ -320,6 +320,9 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
                 {
                     Light light = visibleLights[i].light;
                     bool castShadows = light != null && light.shadows != LightShadows.None;
+
+                    // LWRP doesn't support point light shadows yet
+                    castShadows &= visibleLights[i].lightType != LightType.Point;
                     if (visibleLights[i].lightType == LightType.Directional)
                     {
                         hasDirectionalShadowCastingLight |= castShadows;
