@@ -6,18 +6,18 @@ using UnityEditor.ProjectWindowCallback;
 
 namespace UnityEngine.Experimental.Rendering.LightweightPipeline
 {
-    public enum ShadowCascades
+    public enum ShadowCascadesOption
     {
-        NO_CASCADES = 0,
-        TWO_CASCADES,
-        FOUR_CASCADES,
+        NoCascades,
+        TwoCascades,
+        FourCascades,
     }
 
-    public enum ShadowType
+    public enum ShadowQuality
     {
-        NO_SHADOW = 0,
-        HARD_SHADOWS,
-        SOFT_SHADOWS,
+        Disabled,
+        HardShadows,
+        SoftShadows,
     }
 
     public enum ShadowResolution
@@ -29,7 +29,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         _4096 = 4096
     }
 
-    public enum MSAAQuality
+    public enum MsaaQuality
     {
         Disabled = 1,
         _2x = 2,
@@ -39,7 +39,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
 
     public enum Downsampling
     {
-        None = 0,
+        None,
         _2xBilinear,
         _4xBox,
         _4xBilinear
@@ -47,7 +47,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
 
     public enum DefaultMaterialType
     {
-        Standard = 0,
+        Standard,
         Particle,
         Terrain,
         UnityBuiltinDefault
@@ -82,13 +82,13 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         [SerializeField] bool m_RequireOpaqueTexture = false;
         [SerializeField] Downsampling m_OpaqueDownsampling = Downsampling._2xBilinear;
         [SerializeField] bool m_SupportsHDR = false;
-        [SerializeField] MSAAQuality m_MSAA = MSAAQuality._4x;
+        [SerializeField] MsaaQuality m_MSAA = MsaaQuality._4x;
         [SerializeField] float m_RenderScale = 1.0f;
         [SerializeField] bool m_SupportsDynamicBatching = true;
 
         [SerializeField] ShadowResolution m_ShadowAtlasResolution = ShadowResolution._2048;
         [SerializeField] float m_ShadowDistance = 50.0f;
-        [SerializeField] ShadowCascades m_ShadowCascades = ShadowCascades.FOUR_CASCADES;
+        [SerializeField] ShadowCascadesOption m_ShadowCascades = ShadowCascadesOption.FourCascades;
         [SerializeField] float m_Cascade2Split = 0.25f;
         [SerializeField] Vector3 m_Cascade4Split = new Vector3(0.067f, 0.2f, 0.467f);
         [SerializeField] ShadowResolution m_LocalShadowsAtlasResolution = ShadowResolution._512;
@@ -96,11 +96,23 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         [SerializeField] XRGraphicsConfig m_SavedXRConfig = XRGraphicsConfig.s_DefaultXRConfig;
 
         // Deprecated
-        [SerializeField] ShadowType m_ShadowType = ShadowType.HARD_SHADOWS;
+        [SerializeField] ShadowQuality m_ShadowType = ShadowQuality.HardShadows;
 
 #if UNITY_EDITOR
         [NonSerialized]
         LightweightPipelineEditorResources m_EditorResourcesAsset;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1812")]
+        internal class CreateLightweightPipelineAsset : EndNameEditAction
+        {
+            public override void Action(int instanceId, string pathName, string resourceFile)
+            {
+                var instance = CreateInstance<LightweightPipelineAsset>();
+                instance.m_EditorResourcesAsset = LoadResourceFile<LightweightPipelineEditorResources>();
+                instance.m_ResourcesAsset = LoadResourceFile<LightweightPipelineResources>();
+                AssetDatabase.CreateAsset(instance, pathName);
+            }
+        }
 
         [MenuItem("Assets/Create/Rendering/Lightweight Pipeline Asset", priority = CoreUtils.assetCreateMenuPriority1)]
         static void CreateLightweightPipeline()
@@ -121,17 +133,6 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         {
             var instance = CreateInstance<LightweightPipelineEditorResources>();
             AssetDatabase.CreateAsset(instance, string.Format("Assets/{0}.asset", typeof(LightweightPipelineEditorResources).Name));
-        }
-
-        class CreateLightweightPipelineAsset : EndNameEditAction
-        {
-            public override void Action(int instanceId, string pathName, string resourceFile)
-            {
-                var instance = CreateInstance<LightweightPipelineAsset>();
-                instance.m_EditorResourcesAsset = LoadResourceFile<LightweightPipelineEditorResources>();
-                instance.m_ResourcesAsset = LoadResourceFile<LightweightPipelineResources>();
-                AssetDatabase.CreateAsset(instance, pathName);
-            }
         }
 
         static T LoadResourceFile<T>() where T : ScriptableObject
@@ -242,7 +243,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         public int msaaSampleCount
         {
             get { return (int)m_MSAA; }
-            set { m_MSAA = (MSAAQuality)value; }
+            set { m_MSAA = (MsaaQuality)value; }
         }
 
         public float renderScale
@@ -283,9 +284,9 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             {
                 switch (m_ShadowCascades)
                 {
-                    case ShadowCascades.TWO_CASCADES:
+                    case ShadowCascadesOption.TwoCascades:
                         return 2;
-                    case ShadowCascades.FOUR_CASCADES:
+                    case ShadowCascadesOption.FourCascades:
                         return 4;
                     default:
                         return 1;
@@ -404,7 +405,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             if (k_AssetVersion < 3)
             {
                 k_AssetVersion = 3;
-                m_SoftShadowsSupported = (m_ShadowType == ShadowType.SOFT_SHADOWS);
+                m_SoftShadowsSupported = (m_ShadowType == ShadowQuality.SoftShadows);
             }
         }
     }
