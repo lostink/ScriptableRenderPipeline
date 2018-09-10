@@ -67,6 +67,10 @@ int GetPerObjectLightIndex(half i)
 // Attenuation smoothly decreases to light range.
 half DistanceAttenuation(half distanceSqr, half2 distanceAttenuation)
 {
+    // We use a shared distance attenuation for additional directional and puctual lights
+    // for directional lights attenuation will be 1
+    half lightAtten = 1.0h / distanceSqr;
+
 #if defined(SHADER_HINT_NICE_QUALITY)
     // Use the smoothing factor also used in the Unity lightmapper.
     half factor = distanceSqr * distanceAttenuation.x;
@@ -83,7 +87,7 @@ half DistanceAttenuation(half distanceSqr, half2 distanceAttenuation)
     half smoothFactor = saturate(distanceSqr * distanceAttenuation.x + distanceAttenuation.y);
 #endif
 
-    return smoothFactor * distanceSqr;
+    return lightAtten * smoothFactor;
 }
 
 half AngleAttenuation(half3 spotDirection, half3 lightDirection, half2 spotAttenuation)
