@@ -1,9 +1,24 @@
-using System;
-using UnityEngine;
-
-public class LightweightPipelineEditorResources : ScriptableObject
+namespace UnityEngine.Experimental.Rendering.LightweightPipeline
 {
-    public Material DefaultMaterial;
-    public Material DefaultParticleMaterial;
-    public Material DefaultTerrainMaterial;
+    public class LightweightPipelineEditorResources : ScriptableObject
+    {
+        [SerializeField] Material m_DefaultMaterial = null;
+        [SerializeField] Material m_DefaultParticleMaterial = null;
+        [SerializeField] Material m_DefaultTerrainMaterial = null;
+
+        public Material defaultMaterial
+        {
+            get { return m_DefaultMaterial; }
+        }
+
+        public Material defaultParticleMaterial
+        {
+            get { return m_DefaultParticleMaterial; }
+        }
+
+        public Material defaultTerrainMaterial
+        {
+            get { return m_DefaultTerrainMaterial; }
+        }
+    }
 }

@@ -192,13 +192,13 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             switch (materialType)
             {
                 case DefaultMaterialType.Standard:
-                    return editorResources.DefaultMaterial;
+                    return editorResources.defaultMaterial;
 
                 case DefaultMaterialType.Particle:
-                    return editorResources.DefaultParticleMaterial;
+                    return editorResources.defaultParticleMaterial;
 
                 case DefaultMaterialType.Terrain:
-                    return editorResources.DefaultTerrainMaterial;
+                    return editorResources.defaultTerrainMaterial;
 
                 // Unity Builtin Default
                 default:
@@ -371,22 +371,22 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
 
         public Shader blitShader
         {
-            get { return resources != null ? resources.BlitShader : null; }
+            get { return resources != null ? resources.blitShader : null; }
         }
 
         public Shader copyDepthShader
         {
-            get { return resources != null ? resources.CopyDepthShader : null; }
+            get { return resources != null ? resources.copyDepthShader : null; }
         }
 
         public Shader screenSpaceShadowShader
         {
-            get { return resources != null ? resources.ScreenSpaceShadowShader : null; }
+            get { return resources != null ? resources.screenSpaceShadowShader : null; }
         }
 
         public Shader samplingShader
         {
-            get { return resources != null ? resources.SamplingShader : null; }
+            get { return resources != null ? resources.samplingShader : null; }
         }
 
         public XRGraphicsConfig savedXRGraphicsConfig

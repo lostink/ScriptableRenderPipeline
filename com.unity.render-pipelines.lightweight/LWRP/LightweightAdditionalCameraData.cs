@@ -6,13 +6,13 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
     public class LightweightAdditionalCameraData : MonoBehaviour
     {
         [Tooltip("If enabled shadows will render for this camera.")]
-        public bool renderShadows = true;
+        [SerializeField] public bool m_RenderShadows = true;
 
         [Tooltip("If enabled depth texture will render for this camera bound as _CameraDepthTexture.")]
-        public bool requiresDepthTexture = false;
+        [SerializeField] public bool m_RequiresDepthTexture = false;
 
         [Tooltip("If enabled opaque color texture will render for this camera and bound as _CameraOpaqueTexture.")]
-        public bool requiresColorTexture = false;
+        [SerializeField] public bool m_RequiresColorTexture = false;
 
         [HideInInspector]
         [SerializeField]
@@ -21,6 +21,21 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         public float version
         {
             get { return m_Version; }
+        }
+
+        public bool renderShadows
+        {
+            get { return m_RenderShadows; }
+        }
+
+        public bool requiresDepthTexture
+        {
+            get { return m_RequiresDepthTexture; }
+        }
+
+        public bool requiresColorTexture
+        {
+            get { return m_RequiresColorTexture; }
         }
     }
 }
