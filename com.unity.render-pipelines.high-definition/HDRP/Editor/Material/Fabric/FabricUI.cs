@@ -20,8 +20,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             // Base Color
             public static GUIContent baseColorText = new GUIContent("Base Color + Opacity", "Albedo (RGB) and Opacity (A)");
 
-            // Specular Tint
-            public static GUIContent specularTintText = new GUIContent("Specular Tint", "");
+            // Specular Color
+            public static GUIContent specularColorText = new GUIContent("Specular Color", "");
 
             // Smoothness
             public static GUIContent smoothnessMapChannelText = new GUIContent("Smoothness Source", "Smoothness texture and channel");
@@ -136,9 +136,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         protected MaterialProperty tangentMap = null;
         protected const string kTangentMap = "_TangentMap";
 
-        // Specular Tint
-        protected MaterialProperty specularTint = null;
-        protected const string kSpecularTint = "_SpecularTint";
+        // Specular Color
+        protected MaterialProperty specularColor = null;
+        protected const string kSpecularColor = "_SpecularColor";
 
         // Diffusion profile
         protected MaterialProperty diffusionProfileID = null;
@@ -248,8 +248,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             // Tangent map
             tangentMap = FindProperty(kTangentMap, props);
 
-            // Fuzz tint
-            specularTint = FindProperty(kSpecularTint, props);
+            // Specular Color
+            specularColor = FindProperty(kSpecularColor, props);
 
             // Diffusion profile
             diffusionProfileID = FindProperty(kDiffusionProfileID, props);
@@ -390,8 +390,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             // The primal normal map field
             m_MaterialEditor.TexturePropertySingleLine(Styles.normalMapText, normalMap, normalScale);
 
-            // The specular tint value (that affects the color of the specular lighting term)
-            m_MaterialEditor.ShaderProperty(specularTint, Styles.specularTintText);
+            // The specular color value (that affects the color of the specular lighting term)
+            m_MaterialEditor.ShaderProperty(specularColor, Styles.specularColorText);
 
             // m_MaterialEditor.TexturePropertySingleLine(Styles.bentNormalMapText, bentNormalMap);
 

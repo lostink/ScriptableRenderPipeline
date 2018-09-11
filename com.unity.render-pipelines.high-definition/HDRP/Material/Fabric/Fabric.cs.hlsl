@@ -36,7 +36,7 @@
 #define DEBUGVIEW_FABRIC_BSDFDATA_FRESNEL0 (1352)
 #define DEBUGVIEW_FABRIC_BSDFDATA_AMBIENT_OCCLUSION (1353)
 #define DEBUGVIEW_FABRIC_BSDFDATA_SPECULAR_OCCLUSION (1354)
-#define DEBUGVIEW_FABRIC_BSDFDATA_SPECULAR_TINT (1355)
+#define DEBUGVIEW_FABRIC_BSDFDATA_SPECULAR_COLOR (1355)
 #define DEBUGVIEW_FABRIC_BSDFDATA_NORMAL_WS (1356)
 #define DEBUGVIEW_FABRIC_BSDFDATA_NORMAL_VIEW_SPACE (1357)
 #define DEBUGVIEW_FABRIC_BSDFDATA_PERCEPTUAL_ROUGHNESS (1358)
@@ -61,7 +61,7 @@ struct SurfaceData
     float3 normalWS;
     float perceptualSmoothness;
     float ambientOcclusion;
-    float3 specularTint;
+    float3 specularColor;
     uint diffusionProfile;
     float subsurfaceMask;
     float thickness;
@@ -78,7 +78,7 @@ struct BSDFData
     float3 fresnel0;
     float ambientOcclusion;
     float specularOcclusion;
-    float3 specularTint;
+    float3 specularColor;
     float3 normalWS;
     float perceptualRoughness;
     uint diffusionProfile;
@@ -123,7 +123,7 @@ void GetGeneratedSurfaceDataDebug(uint paramId, SurfaceData surfacedata, inout f
             result = surfacedata.ambientOcclusion.xxx;
             break;
         case DEBUGVIEW_FABRIC_SURFACEDATA_SPECULAR_TINT:
-            result = surfacedata.specularTint;
+            result = surfacedata.specularColor;
             needLinearToSRGB = true;
             break;
         case DEBUGVIEW_FABRIC_SURFACEDATA_DIFFUSION_PROFILE:
@@ -167,8 +167,8 @@ void GetGeneratedBSDFDataDebug(uint paramId, BSDFData bsdfdata, inout float3 res
         case DEBUGVIEW_FABRIC_BSDFDATA_SPECULAR_OCCLUSION:
             result = bsdfdata.specularOcclusion.xxx;
             break;
-        case DEBUGVIEW_FABRIC_BSDFDATA_SPECULAR_TINT:
-            result = bsdfdata.specularTint;
+        case DEBUGVIEW_FABRIC_BSDFDATA_SPECULAR_COLOR:
+            result = bsdfdata.specularColor;
             break;
         case DEBUGVIEW_FABRIC_BSDFDATA_NORMAL_WS:
             result = bsdfdata.normalWS * 0.5 + 0.5;

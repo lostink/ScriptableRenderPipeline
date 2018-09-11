@@ -45,7 +45,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             // Specular Tint
             [SurfaceDataAttributes("Specular Tint", false, true)]
-            public Vector3 specularTint;
+            public Vector3 specularColor;
 
             // MaterialFeature dependent attribute
 
@@ -83,7 +83,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             public float ambientOcclusion;
             public float specularOcclusion;
 
-            public Vector3 specularTint;
+            public Vector3 specularColor;
 
             [SurfaceDataAttributes(new string[] { "Normal WS", "Normal View Space" }, true)]
             public Vector3 normalWS;

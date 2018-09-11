@@ -69,6 +69,10 @@ void GetSurfaceAndBuiltinData(FragInputs input, float3 V, inout PositionInputs p
     // Apply offset and tiling
     uvThread = uvThread * _ThreadMap_ST.xy + _ThreadMap_ST.zw;
 
+    if (_LinkDetailsWithBase > 0.0)
+    {
+        uvThread = uvThread * _BaseColorMap_ST.xy + _BaseColorMap_ST.zw;
+    }
 
 // The Mask map also contains the detail mask flag, se we need to read it first
 #ifdef _MASKMAP
@@ -154,12 +158,13 @@ void GetSurfaceAndBuiltinData(FragInputs input, float3 V, inout PositionInputs p
 #endif
 
     // Propagate the fuzz tint
-    surfaceData.specularTint = _SpecularTint.xyz;
+    surfaceData.specularColor = _SpecularColor.xyz;
 
 #ifdef _FUZZDETAIL_MAP
     surfaceData.baseColor.rgb = saturate(surfaceData.baseColor.rgb + SAMPLE_TEXTURE2D(_FuzzDetailMap, sampler_FuzzDetailMap, uvThread * _FuzzDetailUVScale).rgb * _FuzzDetailScale);
 #endif
 
+    surfaceData.baseColor *= 1.0 - Max3(surfaceData.specularColor.r, surfaceData.specularColor.g, surfaceData.specularColor.b);
 #if defined(_MATERIAL_FEATURE_SUBSURFACE_SCATTERING) || defined(_MATERIAL_FEATURE_TRANSMISSION)
     surfaceData.diffusionProfile = _DiffusionProfile;
     #ifdef _SUBSURFACEMASK

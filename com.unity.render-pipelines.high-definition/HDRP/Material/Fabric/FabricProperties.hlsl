@@ -42,12 +42,14 @@ float4 _UVMappingMaskEmissive;
 
 float4 _DoubleSidedConstants;
 
+float _LinkDetailsWithBase;
+
 float4 _BaseColor;
 float4 _BaseColorMap_ST;
 float4 _BaseColorMap_TexelSize;
 float4 _BaseColorMap_MipInfo;
 
-float4 _SpecularTint;
+float4 _SpecularColor;
 
 float _AlphaCutoff;
 

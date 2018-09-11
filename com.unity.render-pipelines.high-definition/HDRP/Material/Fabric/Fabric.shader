@@ -40,7 +40,7 @@ Shader "HDRenderPipeline/Fabric"
         //_BentNormalMap("_BentNormalMap", 2D) = "bump" {}
 
         // Specular Tint
-        _SpecularTint("SpecularTint", Color) = (1.0, 1.0, 1.0)
+        _SpecularColor("SpecularColor", Color) = (1.0, 1.0, 1.0)
 
         // Thread Data
         [Enum(UV0, 0, UV1, 1, UV2, 2, UV3, 3)] _UVThread("UV Set for thread", Float) = 0
