@@ -222,7 +222,7 @@ namespace UnityEngine.Experimental.Rendering
                 }
 
                 // Regenerate the name
-                renderTexture.name = CoreUtils.GetRenderTargetAutoName(renderTexture.width, renderTexture.height, renderTexture.volumeDepth, renderTexture.format, rth.m_Name, mips: renderTexture.useMipMap, rth.m_EnableMSAA, msaaSamples: m_ScaledRTCurrentMSAASamples);
+                renderTexture.name = CoreUtils.GetRenderTargetAutoName(renderTexture.width, renderTexture.height, renderTexture.volumeDepth, renderTexture.format, rth.m_Name, mips: renderTexture.useMipMap, enableMSAA: rth.m_EnableMSAA, msaaSamples: m_ScaledRTCurrentMSAASamples);
 
                 // Create the render texture
                 renderTexture.Create();
@@ -388,9 +388,6 @@ namespace UnityEngine.Experimental.Rendering
             string name = ""
             )
         {
-            bool allocForMSAA = m_ScaledRTSupportsMSAA ? enableMSAA : false;
-            RTCategory category = allocForMSAA ? RTCategory.MSAA : RTCategory.Regular;
-
             var scaleFactor = scaleFunc(new Vector2Int(GetMaxWidth(), GetMaxHeight()));
             int width = Mathf.Max(scaleFactor.x, 1);
             int height = Mathf.Max(scaleFactor.y, 1);
