@@ -25,6 +25,7 @@ public abstract class TestSceneController : MonoBehaviour {
     protected CanvasController canvasController;
 
     // Camera movement
+    private bool cameraMovement = true;
     protected GameObject cameraGO;
 
     // Rotation
@@ -130,6 +131,10 @@ public abstract class TestSceneController : MonoBehaviour {
             rotateLight = !rotateLight;
             if (dirLight == null) Debug.LogWarning("Warning: dirLight == null");
         }
+        if (Input.GetKeyDown("v"))
+        {
+            cameraMovement = !cameraMovement;
+        }
 
         // Update stuff if we get need to
         if (changed)
@@ -169,7 +174,7 @@ public abstract class TestSceneController : MonoBehaviour {
 
         ExtraFunctionality();
 
-        MoveCamera();
+        if (cameraMovement) MoveCamera();
     }
 
     private void MoveCamera()
