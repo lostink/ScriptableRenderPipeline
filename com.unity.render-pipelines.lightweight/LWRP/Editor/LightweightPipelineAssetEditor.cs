@@ -12,6 +12,10 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         bool shadowsSettingsFoldout = false;
         internal class Styles
         {
+            private Styles()
+            {
+            }
+
             public static GUIContent generalSettingsLabel = new GUIContent("General");
             public static GUIContent qualityLabel = new GUIContent("Quality");
             public static GUIContent shadowLabel = new GUIContent("Shadows");
