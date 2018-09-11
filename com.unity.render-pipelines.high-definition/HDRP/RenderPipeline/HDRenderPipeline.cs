@@ -686,7 +686,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                     // TODO: reading the depth buffer with a compute shader will cause it to decompress in place.
                     // On console, to preserve the depth test performance, we must NOT decompress the 'm_CameraDepthStencilBuffer' in place.
                     // We should call decompressDepthSurfaceToCopy() and decompress it to 'm_CameraDepthBufferMipChain'.
-                    m_GPUCopy.SampleCopyChannel_xyzw2x(cmd, m_CameraDepthStencilBuffer, m_CameraDepthBufferMipChain, new RectInt(0, 0, m_CurrentWidth, m_CurrentHeight));
+                    m_GPUCopy.SampleCopyChannel_xyzw2x(cmd, m_SharedRTManager.GetDepthStencilBuffer(), m_SharedRTManager.GetDepthTexture(), new RectInt(0, 0, m_CurrentWidth, m_CurrentHeight));
                 }
                 m_IsDepthBufferCopyValid = true;
             }
