@@ -12,18 +12,15 @@ Shader "Hidden/TerrainEngine/Details/Vertexlit"
         // Lightmapped
         Pass
         {
-            //Tags{ "LightMode" = "VertexLM"}
-    
-            // Here you will notice we now use HLSL rather than CG in SRP
+            Name "TerrainDetailVertex"
             HLSLPROGRAM
+            // Required to compile gles 2.0 with standard srp library
             #pragma prefer_hlslcc gles
             #pragma exclude_renderers d3d11_9x
             #pragma target 2.0
             
-                        // Required to compile gles 2.0 with standard srp library
-            #pragma prefer_hlslcc gles
-            #pragma exclude_renderers d3d11_9x
-            #pragma target 2.0
+            #pragma vertex Vert
+            #pragma fragment Frag
 
             // -------------------------------------
             // Lightweight Pipeline keywords
@@ -39,99 +36,85 @@ Shader "Hidden/TerrainEngine/Details/Vertexlit"
             #pragma multi_compile _ LIGHTMAP_ON
             #pragma multi_compile_fog
             
-            #pragma vertex vert
-            #pragma fragment frag
-            
-            // Here we include the Core.hlsl of the LWRP Shader Library,
-            // this will inturn also link the Core.hlsl fromt the SRP Core Shader Library.
             #include "LWRP/ShaderLibrary/Core.hlsl"
-            // We added this to access the lighting functions for LWRP,
-            // here we use the refleciton funtions to get the relection probe data
             #include "LWRP/ShaderLibrary/Lighting.hlsl"
     
             float4 _MainTex_ST;
     
-            struct appdata
+            struct Attributes
             {
-                float3 pos : POSITION;
-                float3 uv1 : TEXCOORD1;
-                float3 uv0 : TEXCOORD0;
-                float3 normal : NORMAL;
+                float4  PositionOS  : POSITION;
+                float2  UV0         : TEXCOORD0;
+                float2  UV1         : TEXCOORD1;
+                float3  NormalOS    : NORMAL;
+                half4   Color       : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
     
-            struct v2f
+            struct Varyings
             {
-                float2 uv0 : TEXCOORD0;
-                float2 uv1 : TEXCOORD1;
-                half4 lightingFog : TEXCOORD2; // w=fog
-                float4 shadowCoord :TEXCOORD3;
-                float4 clipPos : SV_POSITION;
-    
+                float4  UV0Lightmap     : TEXCOORD0; // UV0, UV1
+                half4   Color           : TEXCOORD1; // vert color
+                half4   LightingFog     : TEXCOORD2; // w=fog
+                float4  ShadowCoords    :TEXCOORD3;
+                float4  PositionCS      : SV_POSITION;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
     
-            v2f vert(appdata IN)
+            Varyings Vert(Attributes input)
             {
-                v2f o;
-                UNITY_SETUP_INSTANCE_ID(IN);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-    
-                o.uv0 = IN.uv1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
-                o.uv1 = IN.uv0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-                
-                float3 worldPos = TransformObjectToWorld(IN.pos);
-                o.clipPos = TransformObjectToHClip(IN.pos);
-                
-                float3 worldNormal = IN.normal;
-    
-                o.lightingFog.w = ComputeFogFactor(o.clipPos.z);
-            
+                Varyings output;
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+                // Vertex attributes
+                output.UV0Lightmap.xy = input.UV0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+                output.UV0Lightmap.zw = input.UV1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+                float3 PositionWS = TransformObjectToWorld(input.PositionOS);
+                output.PositionCS = TransformObjectToHClip(input.PositionOS);
+                output.Color = input.Color;
+                // Shadow Coords
             #if SHADOWS_SCREEN
-                o.shadowCoord = ComputeShadowCoord(o.clipPos);
+                output.ShadowCoords = ComputeShadowCoord(output.PositionCS);
             #else
-                o.shadowCoord = TransformWorldToShadowCoord(worldPos);
+                output.ShadowCoords = TransformWorldToShadowCoord(PositionWS);
             #endif
-           
+                // Vertex Lighting
+                float3 NormalWS = input.NormalOS;
                 Light mainLight = GetMainLight();
-                //MixRealtimeAndBakedGI(mainLight, worldNormal, bakedGI, half4(0, 0, 0, 0));
-            
                 half3 attenuatedLightColor = mainLight.color * mainLight.attenuation;
-                half3 diffuseColor = LightingLambert(attenuatedLightColor, mainLight.direction, worldNormal);
+                half3 diffuseColor = LightingLambert(attenuatedLightColor, mainLight.direction, NormalWS);
             #ifdef _ADDITIONAL_LIGHTS
                 int pixelLightCount = GetPixelLightCount();
                 for (int i = 0; i < pixelLightCount; ++i)
                 {
                     Light light = GetLight(i, worldPos);
-                    light.attenuation *= LocalLightRealtimeShadowAttenuation(light.index, worldPos);
+                    light.attenuation *= LocalLightRealtimeShadowAttenuation(light.index, PositionWS);
                     half3 attenuatedLightColor = light.color * light.attenuation;
-                    diffuseColor += LightingLambert(attenuatedLightColor, light.direction, worldNormal);
+                    diffuseColor += LightingLambert(attenuatedLightColor, light.direction, NormalWS);
                 }
             #endif
-            
-                o.lightingFog.xyz = diffuseColor;
-            
-                return o;
+                output.LightingFog.xyz = diffuseColor;
+                // Fog factor
+                output.LightingFog.w = ComputeFogFactor(output.PositionCS.z);
+                
+                return output;
             }
     
-            sampler2D _MainTex;
+            TEXTURE2D(_MainTex);       SAMPLER(sampler_MainTex);
     
-            half4 frag(v2f IN) : SV_Target
+            half4 Frag(Varyings input) : SV_Target
             {
-                half3 bakedGI = SampleLightmap(IN.uv0.xy, half3(0, 1, 0));
+                half3 bakedGI = SampleLightmap(input.UV0Lightmap.zw, half3(0, 1, 0));
                 
-                half3 lighting = IN.lightingFog.rgb * MainLightRealtimeShadowAttenuation(IN.shadowCoord) + bakedGI;
-                
-                
-            
-                half4 col;
-                half4 tex = tex2D(_MainTex, IN.uv1.xy);
-                col.rgb = tex.rgb * lighting;
-                col.a = 1.0f;
+                half3 lighting = input.LightingFog.rgb * MainLightRealtimeShadowAttenuation(input.ShadowCoords) + bakedGI;
+
+                half4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.UV0Lightmap.xy);
+                input.Color.rgb *= tex.rgb * lighting;
+                input.Color.a = 1.0f;
     
-                ApplyFog(col.rgb, IN.lightingFog.w);
+                ApplyFog(input.Color.rgb, input.LightingFog.w);
     
-                return col;
+                return input.Color;
             }
     
         ENDHLSL
@@ -139,9 +122,39 @@ Shader "Hidden/TerrainEngine/Details/Vertexlit"
         
         Pass
         {
+            Name "Depth"
+            Tags{"LightMode" = "DepthOnly"}
+
+            ZWrite On
+            ColorMask 0
+
+            HLSLPROGRAM
+            // Required to compile gles 2.0 with standard srp library
+            #pragma prefer_hlslcc gles
+            #pragma exclude_renderers d3d11_9x
+            #pragma target 2.0
+
+            #pragma vertex DepthOnlyVertex
+            #pragma fragment DepthOnlyFragment
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature _ALPHATEST_ON
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+
+            #include "LWRP/ShaderLibrary/InputSurfaceUnlit.hlsl"
+            #include "LWRP/ShaderLibrary/LightweightPassDepthOnly.hlsl"
+            ENDHLSL
+        }
+        
+        Pass
+        {
             Name "Meta"
             Tags{ "LightMode" = "Meta" }
-
+            
             Cull Off
 
             HLSLPROGRAM
