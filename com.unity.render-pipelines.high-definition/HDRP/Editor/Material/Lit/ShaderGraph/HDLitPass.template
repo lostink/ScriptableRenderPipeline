@@ -131,6 +131,9 @@ $splice(Defines)
     #include "HDRP/Material/Decal/DecalUtilities.hlsl"
     #include "HDRP/Material/Lit/LitDecalData.hlsl"
 
+    int _ObjectId;
+    int _PassValue;
+
     // this function assumes the bitangent flip is encoded in tangentWS.w
     // TODO: move this function to HDRP shared file, once we merge with HDRP repo
     float3x3 BuildWorldToTangent(float4 tangentWS, float3 normalWS)

@@ -181,6 +181,34 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             UseInPreview = false
         };
 
+        Pass m_SceneSelectionPass = new Pass()
+        {
+            Name = "SceneSelectionPass",
+            LightMode = "SceneSelectionPass",
+            TemplateName = "HDLitPass.template",
+            TemplateMaterial = "Lit",
+            ShaderPassName = "SHADERPASS_DEPTH_ONLY",
+            ExtraDefines = new List<string>()
+            {
+                "#define SCENESELECTIONPASS",
+            },
+            ColorMaskOverride = "ColorMask 0",
+            Includes = new List<string>()
+            {
+                "#include \"HDRP/ShaderPass/ShaderPassDepthOnly.hlsl\"",
+            },
+            PixelShaderSlots = new List<int>()
+            {
+                HDLitMasterNode.AlphaSlotId,
+                HDLitMasterNode.AlphaThresholdSlotId
+            },
+            VertexShaderSlots = new List<int>()
+            {
+                HDLitMasterNode.PositionSlotId
+            },
+            UseInPreview = true
+        };
+
         Pass m_PassDepthOnly = new Pass()
         {
             Name = "DepthOnly",
@@ -206,7 +234,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             {
                 HDLitMasterNode.PositionSlotId
             },
-            UseInPreview = true
+            UseInPreview = false
         };
 
         Pass m_PassMotionVectors = new Pass()
@@ -780,6 +808,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 GenerateShaderPassLit(masterNode, m_PassGBuffer, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassLit(masterNode, m_PassMETA, mode, subShader, sourceAssetDependencyPaths);
                 GenerateShaderPassLit(masterNode, m_PassShadowCaster, mode, subShader, sourceAssetDependencyPaths);
+                GenerateShaderPassLit(masterNode, m_SceneSelectionPass, mode, subShader, sourceAssetDependencyPaths);
 
                 if (opaque)
                 {
