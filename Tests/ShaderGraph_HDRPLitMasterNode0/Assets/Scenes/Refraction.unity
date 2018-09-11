@@ -50,7 +50,6 @@ LightmapSettings:
     m_BounceScale: 1
     m_IndirectOutputScale: 1
     m_AlbedoBoost: 1
-    m_TemporalCoherenceThreshold: 1
     m_EnvironmentLightingMode: 0
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 1
@@ -1311,7 +1310,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1264568542238458, guid: 865e9e68852324d4284d4820c2354b04, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 865e9e68852324d4284d4820c2354b04, type: 3}
@@ -2160,6 +2159,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1

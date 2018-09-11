@@ -50,7 +50,6 @@ LightmapSettings:
     m_BounceScale: 1
     m_IndirectOutputScale: 1
     m_AlbedoBoost: 1
-    m_TemporalCoherenceThreshold: 1
     m_EnvironmentLightingMode: 0
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 1
@@ -878,6 +877,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1
@@ -1121,6 +1125,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1
@@ -1680,6 +1689,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1
@@ -2312,6 +2326,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1
@@ -3589,7 +3608,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1008783051}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -26.55, y: 1, z: -10}
+  m_LocalPosition: {x: -1.5, y: 2, z: -12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -3643,6 +3662,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1
@@ -4112,6 +4136,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1
@@ -4394,6 +4423,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1
@@ -5477,6 +5511,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1
@@ -6174,6 +6213,11 @@ MonoBehaviour:
     enableDistortion: 1
     enablePostprocess: 1
     enableStereo: 1
+    xrGraphicsConfig:
+      renderScale: 0
+      viewportScale: 0
+      useOcclusionMesh: 0
+      occlusionMaskScale: 0
     enableAsyncCompute: 1
     enableOpaqueObjects: 1
     enableTransparentObjects: 1

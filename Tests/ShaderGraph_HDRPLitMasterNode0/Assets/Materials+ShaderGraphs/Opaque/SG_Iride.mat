@@ -115,7 +115,7 @@ Material:
     m_Floats:
     - Vector1_6FBBC830: 0.5
     - Vector1_7BCB95F2: 0.5
-    - Vector1_8776B5DB: 0
+    - Vector1_8776B5DB: 1
     - _AORemapMax: 1
     - _AORemapMin: 0
     - _ATDistance: 1
@@ -177,8 +177,8 @@ Material:
     - _InitialBend: 1
     - _InvTilingScale: 1
     - _Ior: 1
-    - _IridescenceMask: 1
-    - _IridescenceThickness: 0.5
+    - _IridescenceMask: 0.5
+    - _IridescenceThickness: 1
     - _LinkDetailsWithBase: 1
     - _MaterialID: 1
     - _Metallic: 0.5

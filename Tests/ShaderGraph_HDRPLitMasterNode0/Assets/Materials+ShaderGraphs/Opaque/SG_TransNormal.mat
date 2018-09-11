@@ -29,7 +29,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _CoatMask: 0
-    - _Occlusion: 0
+    - _Occlusion: 1
     - _Profile: 2
     - _Smoothness: 0
     - _Thickness: 1
