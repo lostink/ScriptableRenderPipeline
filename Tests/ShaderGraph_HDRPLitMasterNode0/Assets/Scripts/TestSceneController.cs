@@ -174,6 +174,12 @@ public abstract class TestSceneController : MonoBehaviour {
 
         ExtraFunctionality();
 
+        // Camera distance
+        currentDist -= Input.GetAxis("Mouse ScrollWheel") * scrollSensitivity;
+        if (currentDist < minCameraDist) currentDist = minCameraDist;
+        if (currentDist > maxCameraDist) currentDist = maxCameraDist;
+
+        // Camera movement
         if (cameraMovement) MoveCamera();
     }
 
@@ -191,11 +197,6 @@ public abstract class TestSceneController : MonoBehaviour {
         if (rotY < 0.0f) rotY += 360.0f;
 
         cameraGO.transform.eulerAngles = new Vector3(rotX, rotY, 0.0f);
-
-        // Distance
-        currentDist -= Input.GetAxis("Mouse ScrollWheel") * scrollSensitivity;
-        if (currentDist < minCameraDist) currentDist = minCameraDist;
-        if (currentDist > maxCameraDist) currentDist = maxCameraDist;
 
         // Set position
         float sinY = Mathf.Sin(rotY * Mathf.Deg2Rad);
