@@ -10,6 +10,8 @@
     int  _EnvLightSkyEnabled;         // TODO: make it a bool
     int _DirectionalShadowIndex;
 
+    float _MicroShadowOpacity;
+
     uint _NumTileFtplX;
     uint _NumTileFtplY;
 
@@ -30,13 +32,19 @@
     //#ifdef USE_CLUSTERED_LIGHTLIST
     uint _NumTileClusteredX;
     uint _NumTileClusteredY;
+    
+    float4 _ShadowAtlasSize;
+    float4 _CascadeShadowAtlasSize;
+    uint _CascadeShadowCount;
 
     float4x4 _Env2DCaptureVP[MAX_ENV2D_LIGHT];
+
+    // TODO: move this elsewhere
+    int _DebugSingleShadowIndex;
 
 #else
 
     #include "Packages/com.unity.render-pipelines.high-definition/Runtime/Lighting/LightDefinition.cs.hlsl"
-    #include "Packages/com.unity.render-pipelines.high-definition/Runtime/CoreRP/Shadow/ShadowBase.cs.hlsl"
 
     StructuredBuffer<uint>  g_vLightListGlobal;      // don't support Buffer yet in unity
 
@@ -51,7 +59,6 @@
     StructuredBuffer<DirectionalLightData> _DirectionalLightDatas;
     StructuredBuffer<LightData>            _LightDatas;
     StructuredBuffer<EnvLightData>         _EnvLightDatas;
-    StructuredBuffer<ShadowData>           _ShadowDatas;
 
     // Used by directional and spot lights
     TEXTURE2D_ARRAY(_CookieTextures);

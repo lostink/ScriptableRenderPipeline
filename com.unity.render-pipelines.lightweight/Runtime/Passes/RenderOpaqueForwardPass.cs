@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.Rendering.LightweightPipeline
@@ -61,6 +62,9 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         /// <inheritdoc/>
         public override void Execute(ScriptableRenderer renderer, ScriptableRenderContext context, ref RenderingData renderingData)
         {
+            if (renderer == null)
+                throw new ArgumentNullException("renderer");
+            
             CommandBuffer cmd = CommandBufferPool.Get(k_RenderOpaquesTag);
             using (new ProfilingSample(cmd, k_RenderOpaquesTag))
             {
@@ -78,6 +82,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
                 cmd.Clear();
 
                 Camera camera = renderingData.cameraData.camera;
+                XRUtils.DrawOcclusionMesh(cmd, camera, renderingData.cameraData.isStereoEnabled);
                 var sortFlags = renderingData.cameraData.defaultOpaqueSortFlags;
                 var drawSettings = CreateDrawRendererSettings(camera, sortFlags, rendererConfiguration, renderingData.supportsDynamicBatching);
                 context.DrawRenderers(renderingData.cullResults.visibleRenderers, ref drawSettings, m_OpaqueFilterSettings);

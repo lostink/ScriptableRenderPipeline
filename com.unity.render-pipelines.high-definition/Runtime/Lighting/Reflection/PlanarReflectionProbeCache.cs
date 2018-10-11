@@ -28,7 +28,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
         public PlanarReflectionProbeCache(HDRenderPipelineAsset hdAsset, IBLFilterGGX iblFilter, int cacheSize, int probeSize, TextureFormat probeFormat, bool isMipmaped)
         {
-            m_ConvertTextureMaterial = CoreUtils.CreateEngineMaterial(hdAsset.renderPipelineResources.blitCubeTextureFace);
+            m_ConvertTextureMaterial = CoreUtils.CreateEngineMaterial(hdAsset.renderPipelineResources.shaders.blitCubeTextureFacePS);
             m_ConvertTextureMPB = new MaterialPropertyBlock();
 
             // BC6H requires CPP feature not yet available
@@ -205,6 +205,16 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public Texture GetTexCache()
         {
             return m_TextureCache.GetTexCache();
+        }
+
+        internal static long GetApproxCacheSizeInByte(int nbElement, int resolution)
+        {
+            return TextureCache2D.GetApproxCacheSizeInByte(nbElement, resolution);
+        }
+
+        internal static int GetMaxCacheSizeForWeightInByte(int weight, int resolution)
+        {
+            return TextureCache2D.GetMaxCacheSizeForWeightInByte(weight, resolution);
         }
     }
 }

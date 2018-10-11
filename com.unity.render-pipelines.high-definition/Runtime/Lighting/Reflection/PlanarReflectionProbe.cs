@@ -1,16 +1,26 @@
 using UnityEngine.Serialization;
 using UnityEngine.Rendering;
 using UnityEngine.Assertions;
+using System;
 
 namespace UnityEngine.Experimental.Rendering.HDPipeline
 {
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     public class PlanarReflectionProbe : HDProbe, ISerializationCallbackReceiver
     {
-        const int currentVersion = 2;
+        enum Version
+        {
+            First,
+            Second,
+            MigrateOffsetSphere,
+            MigrateCaptureSettings,
+            // Add new version here and they will automatically be the Current one
+            Max,
+            Current = Max - 1
+        }
 
         [SerializeField, FormerlySerializedAs("version")]
-        int m_Version;
+        uint m_Version;
 
         public enum CapturePositionMode
         {
@@ -21,65 +31,26 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         [SerializeField]
         Vector3 m_CaptureLocalPosition;
         [SerializeField]
-        Texture m_CustomTexture;
-        [SerializeField]
-        Texture m_BakedTexture;
-        [SerializeField]
-        float m_CaptureNearPlane = 1;
-        [SerializeField]
-        float m_CaptureFarPlane = 1000;
-        [SerializeField]
         CapturePositionMode m_CapturePositionMode = CapturePositionMode.Static;
         [SerializeField]
         Vector3 m_CaptureMirrorPlaneLocalPosition;
         [SerializeField]
         Vector3 m_CaptureMirrorPlaneLocalNormal = Vector3.up;
-        [SerializeField]
-        bool m_OverrideFieldOfView = false;
-        [SerializeField]
-        [Range(0, 180)]
-        float m_FieldOfViewOverride = 90;
 
-        public bool overrideFieldOfView { get { return m_OverrideFieldOfView; } }
-        public float fieldOfViewOverride { get { return m_FieldOfViewOverride; } }
+#pragma warning disable 649 //never assigned
+        [SerializeField, Obsolete("keeped only for data migration")]
+        bool m_OverrideFieldOfView;
+        [SerializeField, Obsolete("keeped only for data migration")]
+        float m_FieldOfViewOverride = CaptureSettings.@default.fieldOfView;
+        [SerializeField, Obsolete("keeped only for data migration")]
+        float m_CaptureNearPlane = CaptureSettings.@default.nearClipPlane;
+        [SerializeField, Obsolete("keeped only for data migration")]
+        float m_CaptureFarPlane = CaptureSettings.@default.farClipPlane;
+#pragma warning restore 649 //never assigned
 
         public BoundingSphere boundingSphere { get { return influenceVolume.GetBoundingSphereAt(transform); } }
-
-        public Texture texture
-        {
-            get
-            {
-                switch (mode)
-                {
-                    default:
-                    case ReflectionProbeMode.Baked:
-                        return bakedTexture;
-                    case ReflectionProbeMode.Custom:
-                        return customTexture;
-                    case ReflectionProbeMode.Realtime:
-                        return realtimeTexture;
-                }
-            }
-        }
         public Bounds bounds { get { return influenceVolume.GetBoundsAt(transform); } }
         public Vector3 captureLocalPosition { get { return m_CaptureLocalPosition; } set { m_CaptureLocalPosition = value; } }
-        public Matrix4x4 influenceToWorld
-        {
-            get
-            {
-                var tr = transform;
-                var influencePosition = influenceVolume.GetWorldPosition(tr);
-                return Matrix4x4.TRS(
-                    influencePosition,
-                    tr.rotation,
-                    Vector3.one
-                    );
-            }
-        }
-        public Texture customTexture { get { return m_CustomTexture; } set { m_CustomTexture = value; } }
-        public Texture bakedTexture { get { return m_BakedTexture; } set { m_BakedTexture = value; }}
-        public float captureNearPlane { get { return m_CaptureNearPlane; } }
-        public float captureFarPlane { get { return m_CaptureFarPlane; } }
         public CapturePositionMode capturePositionMode { get { return m_CapturePositionMode; } }
         public Vector3 captureMirrorPlaneLocalPosition
         {
@@ -93,33 +64,11 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             set { m_CaptureMirrorPlaneLocalNormal = value; }
         }
         public Vector3 captureMirrorPlaneNormal { get { return transform.TransformDirection(m_CaptureMirrorPlaneLocalNormal); } }
-
-        #region Proxy Properties
-        public Matrix4x4 proxyToWorld
+        internal override Vector3 capturePosition
         {
             get
             {
-                return proxyVolume != null
-                    ? Matrix4x4.TRS(proxyVolume.transform.position, proxyVolume.transform.rotation, Vector3.one)
-                    : influenceToWorld;
-            }
-        }
-        public ProxyShape proxyShape
-        {
-            get
-            {
-                return proxyVolume != null
-                    ? proxyVolume.proxyVolume.shape
-                    : (ProxyShape)influenceVolume.shape;
-            }
-        }
-        public Vector3 proxyExtents
-        {
-            get
-            {
-                return proxyVolume != null
-                    ? proxyVolume.proxyVolume.extents
-                    : influenceVolume.boxSize;
+                return transform.TransformPoint(captureLocalPosition);
             }
         }
 
@@ -133,7 +82,16 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
         }
 
-        #endregion
+        //for strange reason, current ReflectionSystem needs a proxyExtents two time bigger for planar. To be fixed when refactoring the ReflectionSystem
+        public override Vector3 proxyExtents
+        {
+            get
+            {
+                return proxyVolume != null
+                    ? proxyVolume.proxyVolume.extents
+                    : influenceVolume.boxSize;
+            }
+        }
 
         public void RequestRealtimeRender()
         {
@@ -166,18 +124,32 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public void OnAfterDeserialize()
         {
             Assert.IsNotNull(influenceVolume, "influenceVolume must have an instance at this point. See HDProbe.Awake()");
-            if (m_Version != currentVersion)
+            if (m_Version != (uint)Version.Current)
             {
                 // Add here data migration code
-                if(m_Version < 2)
+                if(m_Version < (uint)Version.MigrateOffsetSphere)
                 {
                     influenceVolume.MigrateOffsetSphere();
+                    //not used for planar, keep it clean
+                    influenceVolume.boxBlendNormalDistanceNegative = Vector3.zero;
+                    influenceVolume.boxBlendNormalDistancePositive = Vector3.zero;
+                    m_Version = (uint)Version.MigrateOffsetSphere;
                 }
-                m_Version = currentVersion;
+                if(m_Version < (uint)Version.MigrateCaptureSettings)
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    if (m_OverrideFieldOfView)
+                    {
+                        captureSettings.overrides |= CaptureSettingsOverrides.FieldOfview;
+                    }
+                    captureSettings.fieldOfView = m_FieldOfViewOverride;
+                    captureSettings.nearClipPlane = m_CaptureNearPlane;
+                    captureSettings.farClipPlane = m_CaptureFarPlane;
+#pragma warning restore CS0618 // Type or member is obsolete
+                    m_Version = (uint)Version.MigrateCaptureSettings;
+                }
             }
 
-            influenceVolume.boxBlendNormalDistanceNegative = Vector3.zero;
-            influenceVolume.boxBlendNormalDistancePositive = Vector3.zero;
         }
     }
 }

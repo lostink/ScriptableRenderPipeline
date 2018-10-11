@@ -6,7 +6,7 @@
 // TODO: Graphics Emulation are breaking structured buffers for now disabling it until we have a fix
 #define USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA 0
 
-// Must match check of use compute buffer in LightweightPipeline.cs
+// Must match check of use compute buffer in LightweightRenderPipeline.cs
 // GLES check here because of WebGL 1.0 support
 // TODO: check performance of using StructuredBuffer on mobile as well
 // #if defined(SHADER_API_MOBILE) || defined(SHADER_API_GLES) || defined(SHADER_API_GLCORE)
@@ -44,15 +44,15 @@ CBUFFER_START(_LightBuffer)
 float4 _MainLightPosition;
 half4 _MainLightColor;
 
-half4 _AdditionalLightCount;
-float4 _AdditionalLightPosition[MAX_VISIBLE_LIGHTS];
-half4 _AdditionalLightColor[MAX_VISIBLE_LIGHTS];
-half4 _AdditionalLightAttenuation[MAX_VISIBLE_LIGHTS];
-half4 _AdditionalLightSpotDir[MAX_VISIBLE_LIGHTS];
+half4 _AdditionalLightsCount;
+float4 _AdditionalLightsPosition[MAX_VISIBLE_LIGHTS];
+half4 _AdditionalLightsColor[MAX_VISIBLE_LIGHTS];
+half4 _AdditionalLightsAttenuation[MAX_VISIBLE_LIGHTS];
+half4 _AdditionalLightsSpotDir[MAX_VISIBLE_LIGHTS];
 CBUFFER_END
 
 #if USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
-StructuredBuffer<int> _LightIndexBuffer;
+StructuredBuffer<int> _AdditionalLightsBuffer;
 #endif
 
 #define UNITY_MATRIX_M     unity_ObjectToWorld
@@ -68,8 +68,8 @@ StructuredBuffer<int> _LightIndexBuffer;
 #define UNITY_MATRIX_IT_MV transpose(mul(UNITY_MATRIX_I_M, UNITY_MATRIX_I_V))
 #define UNITY_MATRIX_MVP   mul(UNITY_MATRIX_VP, UNITY_MATRIX_M)
 
-#include "InputBuiltin.hlsl"
+#include "UnityInput.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
-#include "CoreFunctions.hlsl"
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
 
 #endif

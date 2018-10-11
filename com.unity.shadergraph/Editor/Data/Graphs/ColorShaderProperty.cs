@@ -11,6 +11,9 @@ namespace UnityEditor.ShaderGraph
         [SerializeField]
         private ColorMode m_ColorMode;
 
+        [SerializeField]
+        private bool m_Hidden = false;
+
         public ColorMode colorMode
         {
             get { return m_ColorMode; }
@@ -21,6 +24,12 @@ namespace UnityEditor.ShaderGraph
 
                 m_ColorMode = value;
             }
+        }
+
+        public bool hidden
+        {
+            get { return m_Hidden; }
+            set { m_Hidden = value; }
         }
 
         public ColorShaderProperty()
@@ -38,6 +47,11 @@ namespace UnityEditor.ShaderGraph
             get { return new Vector4(value.r, value.g, value.b, value.a); }
         }
 
+        public override bool isBatchable
+        {
+            get { return true; }
+        }
+
         public override string GetPropertyBlockString()
         {
             if (!generatePropertyBlock)
@@ -46,6 +60,10 @@ namespace UnityEditor.ShaderGraph
             var result = new StringBuilder();
             if (colorMode == ColorMode.HDR)
                 result.Append("[HDR]");
+            if (m_Hidden)
+            {
+                result.Append("[HideInInspector] ");
+            }
             result.Append(referenceName);
             result.Append("(\"");
             result.Append(displayName);
@@ -85,6 +103,8 @@ namespace UnityEditor.ShaderGraph
             var copied = new ColorShaderProperty();
             copied.displayName = displayName;
             copied.value = value;
+            copied.hidden = hidden;
+            copied.colorMode = colorMode;
             return copied;
         }
     }

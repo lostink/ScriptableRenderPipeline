@@ -60,6 +60,12 @@
 #pragma kernel Deferred_Indirect_ShadowMask_Fptl_Variant25      SHADE_OPAQUE_ENTRY=Deferred_Indirect_ShadowMask_Fptl_Variant25      USE_INDIRECT    SHADOWS_SHADOWMASK  VARIANT=25
 #pragma kernel Deferred_Indirect_ShadowMask_Fptl_Variant26      SHADE_OPAQUE_ENTRY=Deferred_Indirect_ShadowMask_Fptl_Variant26      USE_INDIRECT    SHADOWS_SHADOWMASK  VARIANT=26
 
+#ifdef DEBUG_DISPLAY
+    // Don't care about this warning in debug
+#   pragma warning( disable : 4714 ) // sum of temp registers and indexable temp registers times 256 threads exceeds the recommended total 16384.  Performance may be reduced at kernel
+#endif
+
+#define UNITY_SINGLE_PASS_STEREO 1
 
 #define LIGHTLOOP_TILE_PASS 1
 // deferred opaque always use FPTL
@@ -71,7 +77,7 @@
 // Include
 //-------------------------------------------------------------------------------------
 
-#include "../../ShaderPass/ShaderPass.cs.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl"
 #define SHADERPASS SHADERPASS_DEFERRED_LIGHTING
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
@@ -80,9 +86,9 @@
 // deferred material must replace the old one here. If in the future we want to support multiple layout (cause a lot of consistency problem),
 // the deferred shader will require to use multicompile.
 #define UNITY_MATERIAL_LIT // Need to be define before including Material.hlsl
-#include "../../ShaderVariables.hlsl"
-#include "../../Debug/DebugDisplay.hlsl"
-#include "../../Lighting/Lighting.hlsl" // This include Material.hlsl
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Debug/DebugDisplay.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Lighting/Lighting.hlsl" // This include Material.hlsl
 
 #pragma only_renderers d3d11 ps4 xboxone vulkan metal switch
 
@@ -118,7 +124,7 @@ void SHADE_OPAQUE_ENTRY(uint2 groupThreadId : SV_GroupThreadID, uint groupId : S
 void SHADE_OPAQUE_ENTRY(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 groupId : SV_GroupID)
 {
     uint2 tileCoord    = (TILE_SIZE_FPTL * groupId) / GetTileSize();
-    uint2 pixelCoord   = dispatchThreadId;
+	uint2 pixelCoord = TexCoordStereoOffset(dispatchThreadId);// +uint2((unity_StereoEyeIndex * _ScreenSize.x), 0);
     uint  featureFlags = UINT_MAX;
 
 #endif
@@ -126,7 +132,7 @@ void SHADE_OPAQUE_ENTRY(uint2 dispatchThreadId : SV_DispatchThreadID, uint2 grou
     // This need to stay in sync with deferred.shader
 
     float depth = LOAD_TEXTURE2D(_CameraDepthTexture, pixelCoord.xy).x;
-    PositionInputs posInput = GetPositionInput(pixelCoord.xy, _ScreenSize.zw, depth, UNITY_MATRIX_I_VP, UNITY_MATRIX_V, tileCoord);
+    PositionInputs posInput = GetPositionInput_Stereo(pixelCoord.xy, _ScreenSize.zw, depth, UNITY_MATRIX_I_VP, UNITY_MATRIX_V, tileCoord, unity_StereoEyeIndex);
 
     // For indirect case: we can still overlap inside a tile with the sky/background, reject it
     // Can't rely on stencil as we are in compute shader

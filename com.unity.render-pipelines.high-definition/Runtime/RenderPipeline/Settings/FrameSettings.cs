@@ -4,11 +4,86 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.Experimental.Rendering.HDPipeline
 {
+    [Flags]
+    public enum FrameSettingsOverrides
+    {
+        //lighting settings
+        Shadow = 1 << 0,
+        ContactShadow = 1 << 1,
+        ShadowMask = 1 << 2,
+        SSR = 1 << 3,
+        SSAO = 1 << 4,
+        SubsurfaceScattering = 1 << 5,
+        Transmission = 1 << 6,
+        AtmosphericScaterring = 1 << 7,
+        Volumetrics = 1 << 8,
+        ReprojectionForVolumetrics = 1 << 9,
+        LightLayers = 1 << 10,
+        MSAA = 1 << 11,
+
+        //rendering pass
+        TransparentPrepass = 1 << 13,
+        TransparentPostpass = 1 << 14,
+        MotionVectors = 1 << 15,
+        ObjectMotionVectors = 1 << 16,
+        Decals = 1 << 17,
+        RoughRefraction = 1 << 18,
+        Distortion = 1 << 19,
+        Postprocess = 1 << 20,
+
+        //rendering settings
+        ForwardRenderingOnly = 1 << 21,
+        DepthPrepassWithDeferredRendering = 1 << 22,
+        AsyncCompute = 1 << 23,
+        OpaqueObjects = 1 << 24,
+        TransparentObjects = 1 << 25,
+        RealtimePlanarReflection = 1 << 26,
+
+        //stereo settings
+        Stereo = 1 << 27,
+        XrGraphicSettings = 1 << 28
+    }
+
     // The settings here are per frame settings.
     // Each camera must have its own per frame settings
     [Serializable]
+    [System.Diagnostics.DebuggerDisplay("FrameSettings overriding {overrides.ToString(\"X\")}")]
     public class FrameSettings
     {
+        static Dictionary<FrameSettingsOverrides, Action<FrameSettings, FrameSettings>> s_Overrides = new Dictionary<FrameSettingsOverrides, Action<FrameSettings, FrameSettings>>
+        {
+            {FrameSettingsOverrides.Shadow, (a, b) => { a.enableShadow = b.enableShadow; } },
+            {FrameSettingsOverrides.ContactShadow, (a, b) => { a.enableContactShadows = b.enableContactShadows; } },
+            {FrameSettingsOverrides.ShadowMask, (a, b) => { a.enableShadowMask = b.enableShadowMask; } },
+            {FrameSettingsOverrides.SSR, (a, b) => { a.enableSSR = b.enableSSR; } },
+            {FrameSettingsOverrides.SSAO, (a, b) => { a.enableSSAO = b.enableSSAO; } },
+            {FrameSettingsOverrides.SubsurfaceScattering, (a, b) => { a.enableSubsurfaceScattering = b.enableSubsurfaceScattering; } },
+            {FrameSettingsOverrides.Transmission, (a, b) => { a.enableTransmission = b.enableTransmission; } },
+            {FrameSettingsOverrides.AtmosphericScaterring, (a, b) => { a.enableAtmosphericScattering = b.enableAtmosphericScattering; } },
+            {FrameSettingsOverrides.Volumetrics, (a, b) => { a.enableVolumetrics = b.enableVolumetrics; } },
+            {FrameSettingsOverrides.ReprojectionForVolumetrics, (a, b) => { a.enableReprojectionForVolumetrics = b.enableReprojectionForVolumetrics; } },
+            {FrameSettingsOverrides.LightLayers, (a, b) => { a.enableLightLayers = b.enableLightLayers; } },
+            {FrameSettingsOverrides.MSAA, (a, b) => { a.enableMSAA = b.enableMSAA; } },
+            {FrameSettingsOverrides.TransparentPrepass, (a, b) => { a.enableTransparentPrepass = b.enableTransparentPrepass; } },
+            {FrameSettingsOverrides.TransparentPostpass, (a, b) => { a.enableTransparentPostpass = b.enableTransparentPostpass; } },
+            {FrameSettingsOverrides.MotionVectors, (a, b) => { a.enableMotionVectors = b.enableMotionVectors; } },
+            {FrameSettingsOverrides.ObjectMotionVectors, (a, b) => { a.enableObjectMotionVectors = b.enableObjectMotionVectors; } },
+            {FrameSettingsOverrides.Decals, (a, b) => { a.enableDecals = b.enableDecals; } },
+            {FrameSettingsOverrides.RoughRefraction, (a, b) => { a.enableRoughRefraction = b.enableRoughRefraction; } },
+            {FrameSettingsOverrides.Distortion, (a, b) => { a.enableDistortion = b.enableDistortion; } },
+            {FrameSettingsOverrides.Postprocess, (a, b) => { a.enablePostprocess = b.enablePostprocess; } },
+            {FrameSettingsOverrides.ForwardRenderingOnly, (a, b) => { a.enableForwardRenderingOnly = b.enableForwardRenderingOnly; } },
+            {FrameSettingsOverrides.DepthPrepassWithDeferredRendering, (a, b) => { a.enableDepthPrepassWithDeferredRendering = b.enableDepthPrepassWithDeferredRendering; } },
+            {FrameSettingsOverrides.AsyncCompute, (a, b) => { a.enableAsyncCompute = b.enableAsyncCompute; } },
+            {FrameSettingsOverrides.OpaqueObjects, (a, b) => { a.enableOpaqueObjects = b.enableOpaqueObjects; } },
+            {FrameSettingsOverrides.TransparentObjects, (a, b) => { a.enableTransparentObjects = b.enableTransparentObjects; } },
+            {FrameSettingsOverrides.RealtimePlanarReflection, (a, b) => { a.enableRealtimePlanarReflection = b.enableRealtimePlanarReflection; } },
+            {FrameSettingsOverrides.Stereo, (a, b) => { a.enableStereo = b.enableStereo; } },
+            {FrameSettingsOverrides.XrGraphicSettings, (a, b) => { a.xrGraphicsConfig = b.xrGraphicsConfig; } },
+        };
+
+        public FrameSettingsOverrides overrides;
+
         // Lighting
         // Setup by users
         public bool enableShadow = true;
@@ -20,6 +95,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public bool enableTransmission = true;  // Caution: this is only for debug, it doesn't save the cost of Transmission execution
         public bool enableAtmosphericScattering = true;
         public bool enableVolumetrics = true;
+        public bool enableReprojectionForVolumetrics = true;
         public bool enableLightLayers = true;
 
         // Setup by system
@@ -41,17 +117,27 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public bool enablePostprocess = true;
 
         public bool enableStereo = false;
-        public XRGraphicsConfig xrGraphicsConfig;
+        public XRGraphicsConfig xrGraphicsConfig = new XRGraphicsConfig();
 
         public bool enableAsyncCompute = true;
 
         public bool enableOpaqueObjects = true;
         public bool enableTransparentObjects = true;
+        public bool enableRealtimePlanarReflection = true;
 
         public bool enableMSAA = false;
 
+        // GC.Alloc
+        // FrameSettings..ctor() 
         public LightLoopSettings lightLoopSettings = new LightLoopSettings();
 
+        public FrameSettings() {
+        }
+        public FrameSettings(FrameSettings toCopy)
+        {
+            toCopy.CopyTo(this);
+        }
+        
         public void CopyTo(FrameSettings frameSettings)
         {
             frameSettings.enableShadow = this.enableShadow;
@@ -63,6 +149,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             frameSettings.enableTransmission = this.enableTransmission;
             frameSettings.enableAtmosphericScattering = this.enableAtmosphericScattering;
             frameSettings.enableVolumetrics = this.enableVolumetrics;
+            frameSettings.enableReprojectionForVolumetrics = this.enableReprojectionForVolumetrics;
             frameSettings.enableLightLayers = this.enableLightLayers;
 
             frameSettings.diffuseGlobalDimmer = this.diffuseGlobalDimmer;
@@ -81,16 +168,45 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             frameSettings.enablePostprocess = this.enablePostprocess;
 
             frameSettings.enableStereo = this.enableStereo;
-            frameSettings.xrGraphicsConfig = this.xrGraphicsConfig;
+
+            this.xrGraphicsConfig.CopyTo(frameSettings.xrGraphicsConfig);
 
             frameSettings.enableOpaqueObjects = this.enableOpaqueObjects;
             frameSettings.enableTransparentObjects = this.enableTransparentObjects;
+            frameSettings.enableRealtimePlanarReflection = this.enableRealtimePlanarReflection;            
 
             frameSettings.enableAsyncCompute = this.enableAsyncCompute;
 
             frameSettings.enableMSAA = this.enableMSAA;
 
+            frameSettings.overrides = this.overrides;
+
             this.lightLoopSettings.CopyTo(frameSettings.lightLoopSettings);
+        }
+
+        public FrameSettings Override(FrameSettings overridedFrameSettings)
+        {
+            if(overrides == 0)
+            {
+                //nothing to override
+                return overridedFrameSettings;
+            }
+
+            FrameSettings result = new FrameSettings(overridedFrameSettings);
+            Array values = Enum.GetValues(typeof(FrameSettingsOverrides));
+            foreach(FrameSettingsOverrides val in values)
+            {
+                if((val & overrides) > 0)
+                {
+                    s_Overrides[val](result, this);
+                }
+            }
+
+            result.lightLoopSettings = lightLoopSettings.Override(overridedFrameSettings.lightLoopSettings);
+
+            //propagate override to be chained
+            result.overrides = overrides | overridedFrameSettings.overrides;
+            return result;
         }
 
         // Init a FrameSettings from renderpipeline settings, frame settings and debug settings (if any)
@@ -125,6 +241,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 aggregate.enableAtmosphericScattering = false;
             // Volumetric are disabled if there is no atmospheric scattering
             aggregate.enableVolumetrics = srcFrameSettings.enableVolumetrics && renderPipelineSettings.supportVolumetrics && aggregate.enableAtmosphericScattering;
+            aggregate.enableReprojectionForVolumetrics = srcFrameSettings.enableReprojectionForVolumetrics;
 
             // TODO: Add support of volumetric in planar reflection
             if (camera.cameraType == CameraType.Reflection)
@@ -139,7 +256,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             aggregate.enableTransparentPrepass = srcFrameSettings.enableTransparentPrepass;
             aggregate.enableMotionVectors = camera.cameraType != CameraType.Reflection && srcFrameSettings.enableMotionVectors && renderPipelineSettings.supportMotionVectors;
-            aggregate.enableObjectMotionVectors = camera.cameraType != CameraType.Reflection && srcFrameSettings.enableObjectMotionVectors && renderPipelineSettings.supportMotionVectors;
+            // Object motion vector are disabled if motion vector are disabled
+            aggregate.enableObjectMotionVectors = srcFrameSettings.enableObjectMotionVectors && aggregate.enableMotionVectors;
             aggregate.enableDecals = srcFrameSettings.enableDecals && renderPipelineSettings.supportDecals;
             aggregate.enableRoughRefraction = srcFrameSettings.enableRoughRefraction;
             aggregate.enableTransparentPostpass = srcFrameSettings.enableTransparentPostpass;
@@ -150,12 +268,13 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             aggregate.enableStereo = ((camera.cameraType == CameraType.Game) || (camera.cameraType == CameraType.VR)) && srcFrameSettings.enableStereo && XRGraphicsConfig.enabled && (camera.stereoTargetEye == StereoTargetEyeMask.Both);
 
-            aggregate.xrGraphicsConfig = renderPipelineSettings.xrConfig;
+            srcFrameSettings.xrGraphicsConfig.CopyTo(aggregate.xrGraphicsConfig);
 
             aggregate.enableAsyncCompute = srcFrameSettings.enableAsyncCompute && SystemInfo.supportsAsyncCompute;
 
             aggregate.enableOpaqueObjects = srcFrameSettings.enableOpaqueObjects;
             aggregate.enableTransparentObjects = srcFrameSettings.enableTransparentObjects;
+            aggregate.enableRealtimePlanarReflection = srcFrameSettings.enableRealtimePlanarReflection;       
 
             aggregate.enableMSAA = srcFrameSettings.enableMSAA && renderPipelineSettings.supportMSAA;
 
@@ -172,6 +291,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 aggregate.enableSSAO = false;
                 aggregate.enableAtmosphericScattering = false;
                 aggregate.enableVolumetrics = false;
+                aggregate.enableReprojectionForVolumetrics = false;
                 aggregate.enableLightLayers = false;
                 aggregate.enableTransparentPrepass = false;
                 aggregate.enableMotionVectors = false;
@@ -203,7 +323,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         {
             if (enableStereo)
             {
-                // Force forward if we request stereo. TODO: We should not enforce that, users should be able to chose deferred
+                // Stereo deferred rendering still has the following problems:
+                // VR TODO: Dispatch tile light-list compute per-eye
+                // VR TODO: Update compute lighting shaders for stereo
                 enableForwardRenderingOnly = true;
 
                 // TODO: The work will be implemented piecemeal to support all passes
@@ -217,6 +339,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 enableSSR = false;
                 enableSubsurfaceScattering = false;
                 enableTransparentObjects = false;
+
+                xrGraphicsConfig.SetConfig();
             }
         }
 
@@ -234,7 +358,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         new DebugUI.BoolField { displayName = "Enable Transparent Prepass", getter = () => frameSettings.enableTransparentPrepass, setter = value => frameSettings.enableTransparentPrepass = value },
                         new DebugUI.BoolField { displayName = "Enable Transparent Postpass", getter = () => frameSettings.enableTransparentPostpass, setter = value => frameSettings.enableTransparentPostpass = value },
                         new DebugUI.BoolField { displayName = "Enable Motion Vectors", getter = () => frameSettings.enableMotionVectors, setter = value => frameSettings.enableMotionVectors = value },
-                        new DebugUI.BoolField { displayName = "Enable Object Motion Vectors", getter = () => frameSettings.enableObjectMotionVectors, setter = value => frameSettings.enableObjectMotionVectors = value },
+                        new DebugUI.BoolField { displayName = "  Enable Object Motion Vectors", getter = () => frameSettings.enableObjectMotionVectors, setter = value => frameSettings.enableObjectMotionVectors = value },
                         new DebugUI.BoolField { displayName = "Enable DBuffer", getter = () => frameSettings.enableDecals, setter = value => frameSettings.enableDecals = value },
                         new DebugUI.BoolField { displayName = "Enable Rough Refraction", getter = () => frameSettings.enableRoughRefraction, setter = value => frameSettings.enableRoughRefraction = value },
                         new DebugUI.BoolField { displayName = "Enable Distortion", getter = () => frameSettings.enableDistortion, setter = value => frameSettings.enableDistortion = value },
@@ -251,6 +375,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         new DebugUI.BoolField { displayName = "Enable Async Compute", getter = () => frameSettings.enableAsyncCompute, setter = value => frameSettings.enableAsyncCompute = value },
                         new DebugUI.BoolField { displayName = "Enable Opaque Objects", getter = () => frameSettings.enableOpaqueObjects, setter = value => frameSettings.enableOpaqueObjects = value },
                         new DebugUI.BoolField { displayName = "Enable Transparent Objects", getter = () => frameSettings.enableTransparentObjects, setter = value => frameSettings.enableTransparentObjects = value },
+                        new DebugUI.BoolField { displayName = "Enable Realtime Planar Reflection", getter = () => frameSettings.enableRealtimePlanarReflection, setter = value => frameSettings.enableRealtimePlanarReflection = value },                        
                         new DebugUI.BoolField { displayName = "Enable MSAA", getter = () => frameSettings.enableMSAA, setter = value => frameSettings.enableMSAA = value },
                     }
                 },
@@ -268,6 +393,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                         new DebugUI.BoolField { displayName = "Enable ShadowMask", getter = () => frameSettings.enableShadowMask, setter = value => frameSettings.enableShadowMask = value },
                         new DebugUI.BoolField { displayName = "Enable Atmospheric Scattering", getter = () => frameSettings.enableAtmosphericScattering, setter = value => frameSettings.enableAtmosphericScattering = value },
                         new DebugUI.BoolField { displayName = "Enable Volumetrics", getter = () => frameSettings.enableVolumetrics, setter = value => frameSettings.enableVolumetrics = value },
+                        new DebugUI.BoolField { displayName = "Enable Reprojection For Volumetrics", getter = () => frameSettings.enableReprojectionForVolumetrics, setter = value => frameSettings.enableReprojectionForVolumetrics = value },
                         new DebugUI.BoolField { displayName = "Enable LightLayers", getter = () => frameSettings.enableLightLayers, setter = value => frameSettings.enableLightLayers = value },
                     }
                 }

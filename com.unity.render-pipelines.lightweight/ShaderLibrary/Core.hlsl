@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
-#include "Input.hlsl"
+#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Input.hlsl"
 
 #if !defined(SHADER_HINT_NICE_QUALITY)
 #ifdef SHADER_API_MOBILE
@@ -17,12 +17,49 @@
 #define BUMP_SCALE_NOT_SUPPORTED !SHADER_HINT_NICE_QUALITY
 #endif
 
-///////////////////////////////////////////////////////////////////////////////
-#ifdef _NORMALMAP
-    #define OUTPUT_NORMAL(IN, OUT) OutputTangentToWorld(IN.tangent, IN.normal, OUT.tangent.xyz, OUT.binormal.xyz, OUT.normal.xyz)
-#else
-    #define OUTPUT_NORMAL(IN, OUT) OUT.normal = TransformObjectToWorldNormal(IN.normal)
-#endif
+struct VertexPositionInputs
+{
+    float3 positionWS; // World space position
+    float3 positionVS; // View space position
+    float4 positionCS; // Homogeneous clip space position
+};
+
+struct VertexNormalInputs
+{
+    real3 tangentWS;
+    real3 bitangentWS;
+    real3 normalWS;
+};
+
+VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
+{
+    VertexPositionInputs input;
+    input.positionWS = TransformObjectToWorld(positionOS);
+    input.positionVS = TransformWorldToView(input.positionWS);
+    input.positionCS = TransformWorldToHClip(input.positionWS);
+    return input;
+}
+
+VertexNormalInputs GetVertexNormalInputs(float3 normalOS)
+{
+    VertexNormalInputs tbn;
+    tbn.tangentWS = real3(1.0, 0.0, 0.0);
+    tbn.bitangentWS = real3(0.0, 1.0, 0.0);
+    tbn.normalWS = TransformObjectToWorldNormal(normalOS);
+    return tbn;
+}
+
+VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float4 tangentOS)
+{
+    VertexNormalInputs tbn;
+
+    // mikkts space compliant. only normalize when extracting normal at frag.
+    real sign = tangentOS.w * GetOddNegativeScale();
+    tbn.normalWS = TransformObjectToWorldNormal(normalOS);
+    tbn.tangentWS = TransformObjectToWorldDir(tangentOS.xyz);
+    tbn.bitangentWS = cross(tbn.normalWS, tbn.tangentWS) * sign;
+    return tbn;
+}
 
 #if UNITY_REVERSED_Z
     #if SHADER_API_OPENGL || SHADER_API_GLES || SHADER_API_GLES3
@@ -41,34 +78,24 @@
     #define UNITY_Z_0_FAR_FROM_CLIPSPACE(coord) (coord)
 #endif
 
-// TODO: Really need a better define for iOS Metal than the framebuffer fetch one, that's also enabled on android and webgl (???)
-#if defined(SHADER_API_VULKAN) || (defined(SHADER_API_METAL) && defined(UNITY_FRAMEBUFFER_FETCH_AVAILABLE))
-    // Renderpass inputs: Vulkan/Metal subpass input
-#define UNITY_DECLARE_FRAMEBUFFER_INPUT_FLOAT(idx) cbuffer hlslcc_SubpassInput_f_##idx { float4 hlslcc_fbinput_##idx; }
-#define UNITY_DECLARE_FRAMEBUFFER_INPUT_HALF(idx) cbuffer hlslcc_SubpassInput_h_##idx { half4 hlslcc_fbinput_##idx; }
-
-#define UNITY_READ_FRAMEBUFFER_INPUT(idx, v2fname) hlslcc_fbinput_##idx
-#else
-    // Renderpass inputs: General fallback path
-#define UNITY_DECLARE_FRAMEBUFFER_INPUT_FLOAT(idx) TEXTURE2D_FLOAT(_UnityFBInput##idx); float4 _UnityFBInput##idx##_TexelSize
-#define UNITY_DECLARE_FRAMEBUFFER_INPUT_HALF(idx) TEXTURE2D_HALF(_UnityFBInput##idx); float4 _UnityFBInput##idx##_TexelSize
-
-#define UNITY_READ_FRAMEBUFFER_INPUT(idx, v2fvertexname) _UnityFBInput##idx.Load(uint3(v2fvertexname.xy, 0))
-#endif
+float3 GetCameraPositionWS()
+{
+    return _WorldSpaceCameraPos;
+}
 
 float4 GetScaledScreenParams()
 {
     return _ScaledScreenParams;
 }
 
-void AlphaDiscard(half alpha, half cutoff, half offset = 0.0h)
+void AlphaDiscard(real alpha, real cutoff, real offset = 0.0h)
 {
 #ifdef _ALPHATEST_ON
     clip(alpha - cutoff + offset);
 #endif
 }
 
-half3 UnpackNormal(half4 packedNormal)
+real3 UnpackNormal(real4 packedNormal)
 {
 #if defined(UNITY_NO_DXT5nm)
     return UnpackNormalRGBNoScale(packedNormal);
@@ -78,7 +105,7 @@ half3 UnpackNormal(half4 packedNormal)
 #endif
 }
 
-half3 UnpackNormalScale(half4 packedNormal, half bumpScale)
+real3 UnpackNormalScale(real4 packedNormal, real bumpScale)
 {
 #if defined(UNITY_NO_DXT5nm)
     return UnpackNormalRGB(packedNormal, bumpScale);
@@ -87,16 +114,7 @@ half3 UnpackNormalScale(half4 packedNormal, half bumpScale)
 #endif
 }
 
-void OutputTangentToWorld(half4 vertexTangent, half3 vertexNormal, out half3 tangentWS, out half3 binormalWS, out half3 normalWS)
-{
-    // mikkts space compliant. only normalize when extracting normal at frag.
-    half sign = vertexTangent.w * GetOddNegativeScale();
-    normalWS = TransformObjectToWorldNormal(vertexNormal);
-    tangentWS = TransformObjectToWorldDir(vertexTangent.xyz);
-    binormalWS = cross(normalWS, tangentWS) * sign;
-}
-
-half3 FragmentNormalWS(half3 normal)
+real3 NormalizeNormalPerPixel(real3 normal)
 {
 #if !SHADER_HINT_NICE_QUALITY
     // World normal is already normalized in vertex. Small acceptable error to save ALU.
@@ -104,32 +122,6 @@ half3 FragmentNormalWS(half3 normal)
 #else
     return normalize(normal);
 #endif
-}
-
-half3 FragmentViewDirWS(half3 viewDir)
-{
-#if !SHADER_HINT_NICE_QUALITY
-    // View direction is already normalized in vertex. Small acceptable error to save ALU.
-    return viewDir;
-#else
-    return SafeNormalize(viewDir);
-#endif
-}
-
-half3 VertexViewDirWS(half3 viewDir)
-{
-#if !SHADER_HINT_NICE_QUALITY
-    // Normalize in vertex and avoid renormalizing it in frag to save ALU.
-    return SafeNormalize(viewDir);
-#else
-    return viewDir;
-#endif
-}
-
-half3 TangentToWorldNormal(half3 normalTangent, half3 tangent, half3 binormal, half3 normal)
-{
-    half3x3 tangentToWorld = half3x3(tangent, binormal, normal);
-    return FragmentNormalWS(mul(normalTangent, tangentToWorld));
 }
 
 // TODO: A similar function should be already available in SRP lib on master. Use that instead
@@ -141,24 +133,24 @@ float4 ComputeScreenPos(float4 positionCS)
     return o;
 }
 
-half ComputeFogFactor(float z)
+real ComputeFogFactor(float z)
 {
     float clipZ_01 = UNITY_Z_0_FAR_FROM_CLIPSPACE(z);
 
 #if defined(FOG_LINEAR)
     // factor = (end-z)/(end-start) = z * (-1/(end-start)) + (end/(end-start))
     float fogFactor = saturate(clipZ_01 * unity_FogParams.z + unity_FogParams.w);
-    return half(fogFactor);
+    return real(fogFactor);
 #elif defined(FOG_EXP) || defined(FOG_EXP2)
     // factor = exp(-(density*z)^2)
     // -density * z computed at vertex
-    return half(unity_FogParams.x * clipZ_01);
+    return real(unity_FogParams.x * clipZ_01);
 #else
     return 0.0h;
 #endif
 }
 
-void ApplyFogColor(inout half3 color, half3 fogColor, half fogFactor)
+half3 MixFogColor(real3 fragColor, real3 fogColor, real fogFactor)
 {
 #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
 #if defined(FOG_EXP)
@@ -170,13 +162,15 @@ void ApplyFogColor(inout half3 color, half3 fogColor, half fogFactor)
     // fogFactor = density*z compute at vertex
     fogFactor = saturate(exp2(-fogFactor*fogFactor));
 #endif
-    color = lerp(fogColor, color, fogFactor);
+    fragColor = lerp(fogColor, fragColor, fogFactor);
 #endif
+
+    return fragColor;
 }
 
-void ApplyFog(inout half3 color, half fogFactor)
+half3 MixFog(real3 fragColor, real fogFactor)
 {
-    ApplyFogColor(color, unity_FogColor.rgb, fogFactor);
+    return MixFogColor(fragColor, unity_FogColor.rgb, fogFactor);
 }
 
 // Stereo-related bits

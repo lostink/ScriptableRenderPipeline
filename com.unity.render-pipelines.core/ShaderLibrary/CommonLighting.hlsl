@@ -279,6 +279,14 @@ real ComputeWrappedDiffuseLighting(real NdotL, real w)
     return saturate((NdotL + w) / ((1 + w) * (1 + w)));
 }
 
+// Ref: The Technical Art of Uncharted 4 - Brinck and Maximov 2016
+real ComputeMicroShadowing(real AO, real NdotL, real opacity)
+{
+	real aperture = 2.0 * AO * AO;
+	real microshadow = saturate(NdotL + aperture - 1.0);
+	return lerp(1.0, microshadow, opacity);
+}
+
 //-----------------------------------------------------------------------------
 // Helper functions
 //-----------------------------------------------------------------------------
@@ -286,7 +294,7 @@ real ComputeWrappedDiffuseLighting(real NdotL, real w)
 // Ref: "Crafting a Next-Gen Material Pipeline for The Order: 1886".
 float ClampNdotV(float NdotV)
 {
-    return max(NdotV, 0.0001);
+    return max(NdotV, 0.0001); // Approximately 0.0057 degree bias
 }
 
 // return usual BSDF angle
@@ -294,7 +302,7 @@ void GetBSDFAngle(float3 V, float3 L, float NdotL, float unclampNdotV, out float
 {
     // Optimized math. Ref: PBR Diffuse Lighting for GGX + Smith Microsurfaces (slide 114).
     LdotV = dot(L, V);
-    invLenLV = rsqrt(max(2.0 * LdotV + 2.0, FLT_EPS));    // invLenLV = rcp(length(L + V)), clamp to avoid rsqrt(0) = NaN
+    invLenLV = rsqrt(max(2.0 * LdotV + 2.0, FLT_EPS));    // invLenLV = rcp(length(L + V)), clamp to avoid rsqrt(0) = inf, inf * 0 = NaN
     NdotH = saturate((NdotL + unclampNdotV) * invLenLV);        // Do not clamp NdotV here
     LdotH = saturate(invLenLV * LdotV + invLenLV);
     clampNdotV = ClampNdotV(unclampNdotV);

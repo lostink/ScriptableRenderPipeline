@@ -44,8 +44,8 @@ void IntegrateBSDF_LineRef(float3 V, float3 positionWS,
     // The factor of 2 is due to the fact: Integral{0, 2 PI}{max(0, cos(x))dx} = 2.
     float normFactor = 2.0 * invPdf * rcp(sampleCount);
 
-    diffuseLighting  *= normFactor * lightData.diffuseScale  * lightData.color;
-    specularLighting *= normFactor * lightData.specularScale * lightData.color;
+    diffuseLighting  *= normFactor * lightData.diffuseDimmer  * lightData.color;
+    specularLighting *= normFactor * lightData.specularDimmer * lightData.color;
 }
 
 //-----------------------------------------------------------------------------
@@ -57,9 +57,6 @@ void IntegrateBSDF_AreaRef(float3 V, float3 positionWS,
                            out float3 diffuseLighting, out float3 specularLighting,
                            uint sampleCount = 512)
 {
-    // Add some jittering on Hammersley2d
-    float2 randNum = InitRandom(V.xy * 0.5 + 0.5);
-
     diffuseLighting = float3(0.0, 0.0, 0.0);
     specularLighting = float3(0.0, 0.0, 0.0);
 
@@ -70,7 +67,6 @@ void IntegrateBSDF_AreaRef(float3 V, float3 positionWS,
         float lightPdf = 0.0;               // Pdf of the light sample
 
         float2 u = Hammersley2d(i, sampleCount);
-        u = frac(u + randNum);
 
         // Lights in Unity point backward.
         float4x4 localToWorld = float4x4(float4(lightData.right, 0.0), float4(lightData.up, 0.0), float4(-lightData.forward, 0.0), float4(lightData.positionRWS, 1.0));
@@ -113,8 +109,8 @@ void IntegrateBSDF_AreaRef(float3 V, float3 positionWS,
         if (illuminance > 0.0)
         {
             BSDF(V, L, NdotL, positionWS, preLightData, bsdfData, localDiffuseLighting, localSpecularLighting);
-            localDiffuseLighting *= lightData.color * illuminance * lightData.diffuseScale;
-            localSpecularLighting *= lightData.color * illuminance * lightData.specularScale;
+            localDiffuseLighting *= lightData.color * illuminance * lightData.diffuseDimmer;
+            localSpecularLighting *= lightData.color * illuminance * lightData.specularDimmer;
         }
 
         diffuseLighting += localDiffuseLighting;
@@ -137,13 +133,9 @@ float3 IntegrateLambertIBLRef(LightLoopContext lightLoopContext,
     float3x3 localToWorld = float3x3(bsdfData.tangentWS, bsdfData.bitangentWS, bsdfData.normalWS);
     float3   acc          = float3(0.0, 0.0, 0.0);
 
-    // Add some jittering on Hammersley2d
-    float2 randNum  = InitRandom(V.xy * 0.5 + 0.5);
-
     for (uint i = 0; i < sampleCount; ++i)
     {
-        float2 u    = Hammersley2d(i, sampleCount);
-        u           = frac(u + randNum);
+        float2 u = Hammersley2d(i, sampleCount);
 
         float3 L;
         float NdotL;
@@ -170,13 +162,9 @@ float3 IntegrateDisneyDiffuseIBLRef(LightLoopContext lightLoopContext,
     float    NdotV        = ClampNdotV(dot(bsdfData.normalWS, V));
     float3   acc          = float3(0.0, 0.0, 0.0);
 
-    // Add some jittering on Hammersley2d
-    float2 randNum  = InitRandom(V.xy * 0.5 + 0.5);
-
     for (uint i = 0; i < sampleCount; ++i)
     {
-        float2 u    = Hammersley2d(i, sampleCount);
-        u           = frac(u + randNum);
+        float2 u = Hammersley2d(i, sampleCount);
 
         float3 L;
         float NdotL;
@@ -220,13 +208,9 @@ float3 IntegrateSpecularGGXIBLRef(LightLoopContext lightLoopContext,
     float  NdotV = ClampNdotV(dot(bsdfData.normalWS, V));
     float3 acc   = float3(0.0, 0.0, 0.0);
 
-    // Add some jittering on Hammersley2d
-    float2 randNum  = InitRandom(V.xy * 0.5 + 0.5);
-
     for (uint i = 0; i < sampleCount; ++i)
     {
-        float2 u    = Hammersley2d(i, sampleCount);
-        u           = frac(u + randNum);
+        float2 u = Hammersley2d(i, sampleCount);
 
         float VdotH;
         float NdotL;

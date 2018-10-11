@@ -40,11 +40,9 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         public bool supportMotionVectors = true;
         public bool supportRuntimeDebugDisplay = true;
         public bool supportDitheringCrossFade = true;
-
-        public XRGraphicsConfig xrConfig = XRGraphicsConfig.s_DefaultXRConfig;
-
+        
         public GlobalLightLoopSettings  lightLoopSettings = new GlobalLightLoopSettings();
-        public ShadowInitParameters     shadowInitParams = new ShadowInitParameters();
+        public HDShadowInitParameters   hdShadowInitParams = new HDShadowInitParameters();
         public GlobalDecalSettings      decalSettings = new GlobalDecalSettings();
     }
 }

@@ -2,7 +2,7 @@
 // Fill SurfaceData/Builtin data function
 //-------------------------------------------------------------------------------------
 
-#include "../Lit/LitData.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitData.hlsl"
 
 #define LAYERS_HEIGHTMAP_ENABLE (defined(_HEIGHTMAP0) || defined(_HEIGHTMAP1) || (_LAYER_COUNT > 2 && defined(_HEIGHTMAP2)) || (_LAYER_COUNT > 3 && defined(_HEIGHTMAP3)))
 
@@ -137,7 +137,7 @@
 #ifdef _BENTNORMALMAP0
 #define _BENTNORMALMAP_IDX
 #endif
-#include "../Lit/LitDataIndividualLayer.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitDataIndividualLayer.hlsl"
 #undef LAYER_INDEX
 #undef ADD_IDX
 #undef _NORMALMAP_IDX
@@ -171,7 +171,7 @@
 #ifdef _BENTNORMALMAP1
 #define _BENTNORMALMAP_IDX
 #endif
-#include "../Lit/LitDataIndividualLayer.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitDataIndividualLayer.hlsl"
 #undef LAYER_INDEX
 #undef ADD_IDX
 #undef _NORMALMAP_IDX
@@ -205,7 +205,7 @@
 #ifdef _BENTNORMALMAP2
 #define _BENTNORMALMAP_IDX
 #endif
-#include "../Lit/LitDataIndividualLayer.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitDataIndividualLayer.hlsl"
 #undef LAYER_INDEX
 #undef ADD_IDX
 #undef _NORMALMAP_IDX
@@ -239,7 +239,7 @@
 #ifdef _BENTNORMALMAP3
 #define _BENTNORMALMAP_IDX
 #endif
-#include "../Lit/LitDataIndividualLayer.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitDataIndividualLayer.hlsl"
 #undef LAYER_INDEX
 #undef ADD_IDX
 #undef _NORMALMAP_IDX
@@ -396,7 +396,7 @@ void GetLayerTexCoord(FragInputs input, inout LayerTexCoord layerTexCoord)
     GenerateLayerTexCoordBasisTB(input, layerTexCoord);
 #endif
 
-    GetLayerTexCoord(   input.texCoord0, input.texCoord1, input.texCoord2, input.texCoord3,
+    GetLayerTexCoord(   input.texCoord0.xy, input.texCoord1.xy, input.texCoord2.xy, input.texCoord3.xy,
                         input.positionRWS, input.worldToTangent[2].xyz, layerTexCoord);
 }
 
@@ -637,7 +637,7 @@ float3 ComputeMainBaseColorInfluence(float influenceMask, float3 baseColor0, flo
 }
 
 #include "LayeredLitDataDisplacement.hlsl"
-#include "../Lit/LitBuiltinData.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitBuiltinData.hlsl"
 
 void GetSurfaceAndBuiltinData(FragInputs input, float3 V, inout PositionInputs posInput, out SurfaceData surfaceData, out BuiltinData builtinData)
 {
@@ -774,6 +774,10 @@ void GetSurfaceAndBuiltinData(FragInputs input, float3 V, inout PositionInputs p
         surfaceData.baseColor = GetTextureDataDebug(_DebugMipMapMode, layerTexCoord.base0.uv, _BaseColorMap0, _BaseColorMap0_TexelSize, _BaseColorMap0_MipInfo, surfaceData.baseColor);
         surfaceData.metallic = 0;
     }
+
+    // We need to call ApplyDebugToSurfaceData after filling the surfarcedata and before filling builtinData
+    // as it can modify attribute use for static lighting
+    ApplyDebugToSurfaceData(input.worldToTangent, surfaceData);
 #endif
 
 #ifdef _ENABLE_GEOMETRIC_SPECULAR_AA
@@ -784,4 +788,4 @@ void GetSurfaceAndBuiltinData(FragInputs input, float3 V, inout PositionInputs p
     GetBuiltinData(input, V, posInput, surfaceData, alpha, bentNormalWS, depthOffset, builtinData);
 }
 
-#include "../Lit/LitDataMeshModification.hlsl"
+#include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/Lit/LitDataMeshModification.hlsl"

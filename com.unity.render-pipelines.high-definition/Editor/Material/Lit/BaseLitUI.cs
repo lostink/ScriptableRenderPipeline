@@ -9,22 +9,22 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
     // Such a Material will share some properties between it various variant (shader graph variant or hand authored variant).
     // This is the purpose of BaseLitGUI. It contain all properties that are common to all Material based on Lit template.
     // For the default hand written Lit material see LitUI.cs that contain specific properties for our default implementation.
-    public abstract class BaseLitGUI : BaseUnlitGUI
+    abstract class BaseLitGUI : BaseUnlitGUI
     {
         protected static class StylesBaseLit
         {
-            public static GUIContent doubleSidedNormalModeText = new GUIContent("Normal mode", "This will modify the normal base on the selected mode. Mirror: Mirror the normal with vertex normal plane, Flip: Flip the normal");
+            public static GUIContent doubleSidedNormalModeText = new GUIContent("Normal Mode", "This will modify the normal base on the selected mode. Mirror: Mirror the normal with vertex normal plane, Flip: Flip the normal");
             public static GUIContent depthOffsetEnableText = new GUIContent("Enable Depth Offset", "EnableDepthOffset on this shader (Use with heightmap)");
 
             // Displacement mapping (POM, tessellation, per vertex)
             //public static GUIContent enablePerPixelDisplacementText = new GUIContent("Enable Per Pixel Displacement", "");
 
-            public static GUIContent displacementModeText = new GUIContent("Displacement mode", "Apply heightmap displacement to the selected element: Vertex, pixel or tessellated vertex. Pixel displacement must be use with flat surfaces, it is an expensive features and typical usage is paved road.");
+            public static GUIContent displacementModeText = new GUIContent("Displacement Mode", "Apply heightmap displacement to the selected element: Vertex, pixel or tessellated vertex. Pixel displacement must be use with flat surfaces, it is an expensive features and typical usage is paved road.");
             public static GUIContent lockWithObjectScaleText = new GUIContent("Lock with object scale", "Displacement mapping will take the absolute value of the scale of the object into account.");
             public static GUIContent lockWithTilingRateText = new GUIContent("Lock with height map tiling rate", "Displacement mapping will take the absolute value of the tiling rate of the height map into account.");
 
             // Material ID
-            public static GUIContent materialIDText = new GUIContent("Material type", "Select a material feature to enable on top of regular material");
+            public static GUIContent materialIDText = new GUIContent("Material Type", "Select a material feature to enable on top of regular material");
             public static GUIContent transmissionEnableText = new GUIContent("Enable Transmission", "Enable Transmission for getting  back lighting");
 
             // Per pixel displacement
@@ -47,7 +47,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             public static GUIContent tessellationBackFaceCullEpsilonText = new GUIContent("Triangle culling Epsilon", "If -1.0 back face culling is enabled for tessellation, higher number mean more aggressive culling and better performance");
 
             // Vertex animation
-            public static string vertexAnimation = "Vertex animation";
+            public static string vertexAnimation = "Vertex Animation";
 
             // Wind
             public static GUIContent windText = new GUIContent("Enable Wind");
@@ -62,6 +62,10 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             public static GUIContent enableGeometricSpecularAAText = new GUIContent("Enable geometric specular AA", "This reduce specular aliasing on highly dense mesh (Particularly useful when they don't use normal map)");
             public static GUIContent specularAAScreenSpaceVarianceText = new GUIContent("Screen space variance", "Allow to control the strength of the specular AA reduction. Higher mean more blurry result and less aliasing");
             public static GUIContent specularAAThresholdText = new GUIContent("Threshold", "Allow to limit the effect of specular AA reduction. 0 mean don't apply reduction, higher value mean allow higher reduction");
+
+            // SSR
+            public static GUIContent receivesSSRText = new GUIContent("Receives SSR", "Allow to specify if the material can receive SSR or not");
+
         }
 
         public enum DoubleSidedNormalMode
@@ -179,6 +183,11 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         protected MaterialProperty specularAAThreshold = null;
         protected const string kSpecularAAThreshold = "_SpecularAAThreshold";
 
+        // SSR
+        protected MaterialProperty receivesSSR = null;
+        protected const string kReceivesSSR = "_ReceivesSSR";
+
+
         protected override void FindBaseMaterialProperties(MaterialProperty[] props)
         {
             base.FindBaseMaterialProperties(props);
@@ -226,6 +235,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             enableGeometricSpecularAA = FindProperty(kEnableGeometricSpecularAA, props, false);
             specularAAScreenSpaceVariance = FindProperty(kSpecularAAScreenSpaceVariance, props, false);
             specularAAThreshold = FindProperty(kSpecularAAThreshold, props, false);
+
+            // SSR
+            receivesSSR = FindProperty(kReceivesSSR, props, false);
         }
 
         void TessellationModePopup()
@@ -249,9 +261,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         protected override void BaseMaterialPropertiesGUI()
         {
             base.BaseMaterialPropertiesGUI();
-
-            EditorGUI.indentLevel++;
-
+            
             // This follow double sided option
             if (doubleSidedEnable != null && doubleSidedEnable.floatValue > 0.0f)
             {
@@ -290,8 +300,10 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 }
             }
 
-            if (enableMotionVectorForVertexAnimation != null)
-                m_MaterialEditor.ShaderProperty(enableMotionVectorForVertexAnimation, StylesBaseUnlit.enableMotionVectorForVertexAnimationText);
+            if(receivesSSR != null)
+            {
+                m_MaterialEditor.ShaderProperty(receivesSSR, StylesBaseLit.receivesSSRText);
+            }
 
             if (displacementMode != null)
             {
@@ -327,8 +339,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     EditorGUI.indentLevel--;
                 }
             }
-
-            EditorGUI.indentLevel--;
         }
 
         protected virtual void MaterialTesselationPropertiesGUI()
@@ -397,24 +407,30 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
         protected override void VertexAnimationPropertiesGUI()
         {
-            if (windEnable == null)
-                return;
-            
             using (var header = new HeaderScope(StylesBaseLit.vertexAnimation, (uint)Expendable.VertexAnimation, this))
             {
                 if (header.expended)
                 {
-                    m_MaterialEditor.ShaderProperty(windEnable, StylesBaseLit.windText);
-                    if (!windEnable.hasMixedValue && windEnable.floatValue > 0.0f)
+                    if (windEnable != null)
                     {
-                        EditorGUI.indentLevel++;
-                        m_MaterialEditor.ShaderProperty(windInitialBend, StylesBaseLit.windInitialBendText);
-                        m_MaterialEditor.ShaderProperty(windStiffness, StylesBaseLit.windStiffnessText);
-                        m_MaterialEditor.ShaderProperty(windDrag, StylesBaseLit.windDragText);
-                        m_MaterialEditor.ShaderProperty(windShiverDrag, StylesBaseLit.windShiverDragText);
-                        m_MaterialEditor.ShaderProperty(windShiverDirectionality, StylesBaseLit.windShiverDirectionalityText);
-                        EditorGUI.indentLevel--;
+                        // Hide wind option. Wind is deprecated and will be remove in the future. Use shader graph instead
+                        /*
+                        m_MaterialEditor.ShaderProperty(windEnable, StylesBaseLit.windText);
+                        if (!windEnable.hasMixedValue && windEnable.floatValue > 0.0f)
+                        {
+                            EditorGUI.indentLevel++;
+                            m_MaterialEditor.ShaderProperty(windInitialBend, StylesBaseLit.windInitialBendText);
+                            m_MaterialEditor.ShaderProperty(windStiffness, StylesBaseLit.windStiffnessText);
+                            m_MaterialEditor.ShaderProperty(windDrag, StylesBaseLit.windDragText);
+                            m_MaterialEditor.ShaderProperty(windShiverDrag, StylesBaseLit.windShiverDragText);
+                            m_MaterialEditor.ShaderProperty(windShiverDirectionality, StylesBaseLit.windShiverDirectionalityText);
+                            EditorGUI.indentLevel--;
+                        }
+                        */
                     }
+
+                    if (enableMotionVectorForVertexAnimation != null)
+                        m_MaterialEditor.ShaderProperty(enableMotionVectorForVertexAnimation, StylesBaseUnlit.enableMotionVectorForVertexAnimationText);
                 }
             }
         }
@@ -446,13 +462,21 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             // Set the reference value for the stencil test.
             int stencilRef = (int)StencilLightingUsage.RegularLighting;
+            int stencilWriteMask = (int)HDRenderPipeline.StencilBitMask.LightingMask;
             if (material.HasProperty(kMaterialID) && (int)material.GetFloat(kMaterialID) == (int)BaseLitGUI.MaterialId.LitSSS)
             {
                 stencilRef = (int)StencilLightingUsage.SplitLighting;
             }
+
+            if(material.HasProperty(kReceivesSSR) && material.GetInt(kReceivesSSR) == 0)
+            {
+                stencilWriteMask |= (int)HDRenderPipeline.StencilBitMask.DoesntReceiveSSR;
+                stencilRef |= (int)HDRenderPipeline.StencilBitMask.DoesntReceiveSSR;
+            }
+
             // As we tag both during velocity pass and Gbuffer pass we need a separate state and we need to use the write mask
             material.SetInt(kStencilRef, stencilRef);
-            material.SetInt(kStencilWriteMask, (int)HDRenderPipeline.StencilBitMask.LightingMask);
+            material.SetInt(kStencilWriteMask, stencilWriteMask);
             material.SetInt(kStencilRefMV, (int)HDRenderPipeline.StencilBitMask.ObjectVelocity);
             material.SetInt(kStencilWriteMaskMV, (int)HDRenderPipeline.StencilBitMask.ObjectVelocity);
 
@@ -493,7 +517,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
             // Use negation so we don't create keyword by default
             CoreUtils.SetKeyword(material, "_DISABLE_DECALS", material.HasProperty(kSupportDecals) && material.GetFloat(kSupportDecals) == 0.0);
-
+            CoreUtils.SetKeyword(material, "_DISABLE_SSR", material.HasProperty(kReceivesSSR) && material.GetFloat(kReceivesSSR) == 0.0);
             CoreUtils.SetKeyword(material, "_ENABLE_GEOMETRIC_SPECULAR_AA", material.HasProperty(kEnableGeometricSpecularAA) && material.GetFloat(kEnableGeometricSpecularAA) == 1.0);
         }
 

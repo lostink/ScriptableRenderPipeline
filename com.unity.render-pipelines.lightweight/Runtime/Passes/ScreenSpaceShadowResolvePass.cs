@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.Rendering;
 
 namespace UnityEngine.Experimental.Rendering.LightweightPipeline
@@ -31,6 +32,9 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         /// <inheritdoc/>
         public override void Execute(ScriptableRenderer renderer, ScriptableRenderContext context, ref RenderingData renderingData)
         {
+            if (renderer == null)
+                throw new ArgumentNullException("renderer");
+            
             if (renderingData.lightData.mainLightIndex == -1)
                 return;
 
@@ -49,7 +53,7 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
             RenderTargetIdentifier screenSpaceOcclusionTexture = colorAttachmentHandle.Identifier();
             SetRenderTarget(cmd, screenSpaceOcclusionTexture, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
                 ClearFlag.Color | ClearFlag.Depth, Color.white, descriptor.dimension);
-            cmd.Blit(screenSpaceOcclusionTexture, screenSpaceOcclusionTexture, renderer.GetMaterial(MaterialHandles.ScreenSpaceShadow));
+            cmd.Blit(screenSpaceOcclusionTexture, screenSpaceOcclusionTexture, renderer.GetMaterial(MaterialHandle.ScreenSpaceShadow));
 
             if (renderingData.cameraData.isStereoEnabled)
             {
@@ -66,6 +70,9 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
         /// <inheritdoc/>
         public override void FrameCleanup(CommandBuffer cmd)
         {
+            if (cmd == null)
+                throw new ArgumentNullException("cmd");
+            
             if (colorAttachmentHandle != RenderTargetHandle.CameraTarget)
             {
                 cmd.ReleaseTemporaryRT(colorAttachmentHandle.id);
@@ -75,8 +82,8 @@ namespace UnityEngine.Experimental.Rendering.LightweightPipeline
 
         void SetShadowCollectPassKeywords(CommandBuffer cmd, ref VisibleLight shadowLight, ref ShadowData shadowData)
         {
-            CoreUtils.SetKeyword(cmd, LightweightKeywordStrings.SoftShadows, shadowData.supportsSoftShadows && shadowLight.light.shadows == LightShadows.Soft);
-            CoreUtils.SetKeyword(cmd, LightweightKeywordStrings.CascadeShadows, shadowData.directionalLightCascadeCount > 1);
+            CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.SoftShadows, shadowData.supportsSoftShadows && shadowLight.light.shadows == LightShadows.Soft);
+            CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.MainLightShadowCascades, shadowData.mainLightShadowCascadesCount > 1);
         }
     }
 }

@@ -50,7 +50,7 @@ Shader "Hidden/HDRenderPipeline/Deferred"
             // Include
             //-------------------------------------------------------------------------------------
 
-            #include "../ShaderPass/ShaderPass.cs.hlsl"
+            #include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl"
             #define SHADERPASS SHADERPASS_DEFERRED_LIGHTING
 
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
@@ -59,11 +59,11 @@ Shader "Hidden/HDRenderPipeline/Deferred"
             // deferred material must replace the old one here. If in the future we want to support multiple layout (cause a lot of consistency problem),
             // the deferred shader will require to use multicompile.
             #define UNITY_MATERIAL_LIT // Need to be define before including Material.hlsl
-            #include "../ShaderVariables.hlsl"
+            #include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
             #ifdef DEBUG_DISPLAY
-            #include "../Debug/DebugDisplay.hlsl"
+            #include "Packages/com.unity.render-pipelines.high-definition/Runtime/Debug/DebugDisplay.hlsl"
             #endif
-            #include "../Lighting/Lighting.hlsl" // This include Material.hlsl
+            #include "Packages/com.unity.render-pipelines.high-definition/Runtime/Lighting/Lighting.hlsl" // This include Material.hlsl
 
             //-------------------------------------------------------------------------------------
             // variable declaration
@@ -102,7 +102,8 @@ Shader "Hidden/HDRenderPipeline/Deferred"
 
                 // input.positionCS is SV_Position
                 float depth = LOAD_TEXTURE2D(_CameraDepthTexture, input.positionCS.xy).x;
-                PositionInputs posInput = GetPositionInput(input.positionCS.xy, _ScreenSize.zw, depth, UNITY_MATRIX_I_VP, UNITY_MATRIX_V, uint2(input.positionCS.xy) / GetTileSize());
+
+                PositionInputs posInput = GetPositionInput_Stereo(input.positionCS.xy, _ScreenSize.zw, depth, UNITY_MATRIX_I_VP, UNITY_MATRIX_V, uint2(input.positionCS.xy) / GetTileSize(), unity_StereoEyeIndex);
                 float3 V = GetWorldSpaceNormalizeViewDir(posInput.positionWS);
 
                 BSDFData bsdfData;

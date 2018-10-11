@@ -22,9 +22,6 @@ Shader "HDRenderPipeline/Decal"
         // Stencil state
         [HideInInspector] _DecalStencilRef("_DecalStencilRef", Int) = 8 
         [HideInInspector] _DecalStencilWriteMask("_DecalStencilWriteMask", Int) = 8
-
-        // this will let collapsable element of material be persistant
-        [HideInInspector] _EditorExpendedAreas("_EditorExpendedAreas", Float) = 0
     }
 
     HLSLINCLUDE
@@ -55,8 +52,8 @@ Shader "HDRenderPipeline/Decal"
 
     #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
     #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Wind.hlsl"
-    #include "../../ShaderPass/FragInputs.hlsl"
-    #include "../../ShaderPass/ShaderPass.cs.hlsl"
+    #include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/FragInputs.hlsl"
+    #include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPass.cs.hlsl"
 
 
     //-------------------------------------------------------------------------------------
@@ -103,11 +100,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_MESH
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -159,11 +156,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_PROJECTOR
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -196,11 +193,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_PROJECTOR
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -233,11 +230,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_PROJECTOR
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -270,11 +267,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_PROJECTOR
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -308,11 +305,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_PROJECTOR
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -347,11 +344,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_PROJECTOR
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -382,11 +379,11 @@ Shader "HDRenderPipeline/Decal"
             HLSLPROGRAM
 
             #define SHADERPASS SHADERPASS_DBUFFER_PROJECTOR
-            #include "../../ShaderVariables.hlsl"
+            #include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
             #include "Decal.hlsl"
             #include "ShaderPass/DecalSharePass.hlsl"
             #include "DecalData.hlsl"
-            #include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+            #include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
             ENDHLSL
         }
@@ -427,11 +424,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_MESH
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -463,11 +460,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_MESH
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -499,11 +496,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_MESH
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -534,11 +531,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_MESH
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -571,11 +568,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_MESH
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -607,11 +604,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_MESH
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
@@ -640,11 +637,11 @@ Shader "HDRenderPipeline/Decal"
 			HLSLPROGRAM
 
 			#define SHADERPASS SHADERPASS_DBUFFER_MESH
-			#include "../../ShaderVariables.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/ShaderLibrary/ShaderVariables.hlsl"
 			#include "Decal.hlsl"
 			#include "ShaderPass/DecalSharePass.hlsl"
 			#include "DecalData.hlsl"
-			#include "../../ShaderPass/ShaderPassDBuffer.hlsl"
+			#include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDBuffer.hlsl"
 
 			ENDHLSL
 		}
