@@ -340,11 +340,15 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         void UpgradeResourcesIfNeeded()
         {
 #if UNITY_EDITOR
+            //possible because deserialized along the asset
             m_Asset.renderPipelineResources.UpgradeIfNeeded();
+            //however it is not possible to call the same way the editor resources.
+            //Reason: we pass here before the asset are accessible on disk.
+            //Migration is done at deserialisation time for this scriptableobject
+            //Note: renderPipelineResources can be migrated at deserialisation time too to have a more unified API
 #endif
         }
-
-
+        
         void InitializeRenderTextures()
         {
             RenderPipelineSettings settings = m_Asset.renderPipelineSettings;
@@ -1866,7 +1870,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             m_SkyManager.RenderSky(hdCamera, m_LightLoop.GetCurrentSunLight(), colorBuffer, depthBuffer, m_CurrentDebugDisplaySettings, cmd);
 
             if (visualEnv.fogType.value != FogType.None)
-                m_SkyManager.RenderOpaqueAtmosphericScattering(cmd, colorBuffer, depthBuffer, hdCamera.frameSettings.enableMSAA);
+                m_SkyManager.RenderOpaqueAtmosphericScattering(cmd, hdCamera, colorBuffer, depthBuffer, hdCamera.frameSettings.enableMSAA);
         }
 
         public Texture2D ExportSkyToTexture()
@@ -2261,6 +2265,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 var debugSmoothness = new Vector4(lightingDebugSettings.overrideSmoothness ? 1.0f : 0.0f, lightingDebugSettings.overrideSmoothnessValue, 0.0f, 0.0f);
                 var debugNormal = new Vector4(lightingDebugSettings.overrideNormal ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
                 var debugSpecularColor = new Vector4(lightingDebugSettings.overrideSpecularColor ? 1.0f : 0.0f, lightingDebugSettings.overrideSpecularColorValue.r, lightingDebugSettings.overrideSpecularColorValue.g, lightingDebugSettings.overrideSpecularColorValue.b);
+                var debugEmissiveColor = new Vector4(lightingDebugSettings.overrideEmissiveColor ? 1.0f : 0.0f, lightingDebugSettings.overrideEmissiveColorValue.r, lightingDebugSettings.overrideEmissiveColorValue.g, lightingDebugSettings.overrideEmissiveColorValue.b);
 
                 cmd.SetGlobalInt(HDShaderIDs._DebugViewMaterial, (int)m_CurrentDebugDisplaySettings.GetDebugMaterialIndex());
                 cmd.SetGlobalInt(HDShaderIDs._DebugLightingMode, (int)m_CurrentDebugDisplaySettings.GetDebugLightingMode());
@@ -2273,6 +2278,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 cmd.SetGlobalVector(HDShaderIDs._DebugLightingSmoothness, debugSmoothness);
                 cmd.SetGlobalVector(HDShaderIDs._DebugLightingNormal, debugNormal);
                 cmd.SetGlobalVector(HDShaderIDs._DebugLightingSpecularColor, debugSpecularColor);
+                cmd.SetGlobalVector(HDShaderIDs._DebugLightingEmissiveColor, debugEmissiveColor);
 
                 cmd.SetGlobalVector(HDShaderIDs._MousePixelCoord, HDUtils.GetMouseCoordinates(hdCamera));
                 cmd.SetGlobalVector(HDShaderIDs._MouseClickPixelCoord, HDUtils.GetMouseClickCoordinates(hdCamera));
