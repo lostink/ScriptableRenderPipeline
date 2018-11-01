@@ -43,7 +43,10 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             ShaderPassName = "SHADERPASS_FORWARD_UNLIT",
             ExtraDefines = new List<string>()
             {
-                "#pragma multi_compile _ DEBUG_DISPLAY"
+                "#pragma multi_compile _ DEBUG_DISPLAY",
+                "#pragma multi_compile _ LIGHTMAP_ON",
+                "#pragma multi_compile _ DIRLIGHTMAP_COMBINED",
+                "#pragma multi_compile _ DYNAMICLIGHTMAP_ON",
             },
             Includes = new List<string>()
             {
@@ -108,7 +111,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             },
             Includes = new List<string>()
             {
-                "#include \"Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl\"",
+                "#include \"Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/ShaderPass/ShaderPassDepthOnly.hlsl\"",
             },
             RequiredFields = new List<string>()
             {
