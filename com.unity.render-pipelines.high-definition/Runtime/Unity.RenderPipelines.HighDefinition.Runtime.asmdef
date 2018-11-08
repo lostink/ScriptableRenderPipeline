@@ -1,15 +1,10 @@
 {
     "name": "Unity.RenderPipelines.HighDefinition.Runtime",
     "references": [
-        "Unity.RenderPipelines.Core.Runtime",
-        "Unity.Postprocessing.Runtime"
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": true,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": []
+    "allowUnsafeCode": true
 }
