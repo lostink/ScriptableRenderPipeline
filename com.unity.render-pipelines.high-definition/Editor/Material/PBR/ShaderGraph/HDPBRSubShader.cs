@@ -1,16 +1,14 @@
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph;
-using UnityEngine.Experimental.Rendering;
 using UnityEngine.Experimental.Rendering.HDPipeline;
 using UnityEngine.Rendering;
 
 namespace UnityEditor.Experimental.Rendering.HDPipeline
 {
     [FormerName("UnityEditor.ShaderGraph.HDPBRSubShader")]
-    public class HDPBRSubShader : IPBRSubShader
+    class HDPBRSubShader : IPBRSubShader
     {
         Pass m_PassGBuffer = new Pass()
         {

@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using UnityEditor.Graphing;
 using UnityEditor.ShaderGraph;
-using UnityEngine.Experimental.Rendering;
 using UnityEngine.Experimental.Rendering.HDPipeline;
 using UnityEngine.Rendering;
 
 namespace UnityEditor.Experimental.Rendering.HDPipeline
 {
-    public class HDLitSubShader : IHDLitSubShader
+    class HDLitSubShader : IHDLitSubShader
     {
         Pass m_PassGBuffer = new Pass()
         {
@@ -612,7 +611,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     {
                         activeFields.Add("DoubleSided.Mirror");
                     }
-                        
+
                     activeFields.Add("FragInputs.isFrontFace");     // will need this for determining normal flip mode
                 }
             }
@@ -655,7 +654,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             {
                 int count = 0;
                 if (pass.PixelShaderUsesSlot(HDLitMasterNode.AlphaThresholdSlotId))
-                { 
+                {
                     activeFields.Add("AlphaTest");
                     ++count;
                 }
