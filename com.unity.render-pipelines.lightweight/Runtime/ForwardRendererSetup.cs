@@ -29,6 +29,8 @@ namespace UnityEngine.Experimental.Rendering.LWRP
         private EndXRRenderingPass m_EndXrRenderingPass;
 
 #if UNITY_EDITOR
+        private GizmoRenderingPass m_LitGizmoRenderingPass;
+        private GizmoRenderingPass m_UnlitGizmoRenderingPass;
         private SceneViewDepthCopyPass m_SceneViewDepthCopyPass;
 #endif
 
@@ -73,6 +75,8 @@ namespace UnityEngine.Experimental.Rendering.LWRP
 
 #if UNITY_EDITOR
             m_SceneViewDepthCopyPass = new SceneViewDepthCopyPass();
+            m_LitGizmoRenderingPass = new GizmoRenderingPass();
+            m_UnlitGizmoRenderingPass = new GizmoRenderingPass();
 #endif
 
             // RenderTexture format depends on camera and pipeline (HDR, non HDR, etc)
@@ -170,7 +174,9 @@ namespace UnityEngine.Experimental.Rendering.LWRP
                     || m_AfterOpaquePostProcessPasses.Count != 0
                     || m_AfterSkyboxPasses.Count != 0
                     || m_AfterTransparentPasses.Count != 0
-                    || m_AfterRenderPasses.Count != 0;
+                    || m_AfterRenderPasses.Count != 0
+                    || Display.main.requiresBlitToBackbuffer
+                    || renderingData.killAlphaInFinalBlit;
 
             RenderTargetHandle colorHandle = RenderTargetHandle.CameraTarget;
             RenderTargetHandle depthHandle = RenderTargetHandle.CameraTarget;
@@ -240,6 +246,11 @@ namespace UnityEngine.Experimental.Rendering.LWRP
             foreach (var pass in m_AfterTransparentPasses)
                 renderer.EnqueuePass(pass.GetPassToEnqueue(baseDescriptor, colorHandle, depthHandle));
 
+#if UNITY_EDITOR
+            m_LitGizmoRenderingPass.Setup(true);
+            renderer.EnqueuePass(m_LitGizmoRenderingPass);
+#endif
+
             bool afterRenderExists = m_AfterRenderPasses.Count != 0;
 
             // if we have additional filters
@@ -265,7 +276,7 @@ namespace UnityEngine.Experimental.Rendering.LWRP
                 //now blit into the final target
                 if (colorHandle != RenderTargetHandle.CameraTarget)
                 {
-                    m_FinalBlitPass.Setup(baseDescriptor, colorHandle);
+                    m_FinalBlitPass.Setup(baseDescriptor, colorHandle, Display.main.requiresSrgbBlitToBackbuffer, renderingData.killAlphaInFinalBlit);
                     renderer.EnqueuePass(m_FinalBlitPass);
                 }
             }
@@ -278,7 +289,7 @@ namespace UnityEngine.Experimental.Rendering.LWRP
                 }
                 else if (colorHandle != RenderTargetHandle.CameraTarget)
                 {
-                    m_FinalBlitPass.Setup(baseDescriptor, colorHandle);
+                    m_FinalBlitPass.Setup(baseDescriptor, colorHandle, Display.main.requiresSrgbBlitToBackbuffer, renderingData.killAlphaInFinalBlit);
                     renderer.EnqueuePass(m_FinalBlitPass);
                 }
             }
@@ -289,6 +300,9 @@ namespace UnityEngine.Experimental.Rendering.LWRP
             }
 
 #if UNITY_EDITOR
+            m_UnlitGizmoRenderingPass.Setup(false);
+            renderer.EnqueuePass(m_UnlitGizmoRenderingPass);
+
             if (renderingData.cameraData.isSceneViewCamera)
             {
                 m_SceneViewDepthCopyPass.Setup(m_DepthTexture);
